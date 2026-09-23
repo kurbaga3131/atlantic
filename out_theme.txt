@@ -1,0 +1,24 @@
+{
+  "font": {
+    "title": "Yazı Tipi (Font)",
+    "desc": "Sistem için standart yazı tipini seçin",
+    "select": "Seç..."
+  },
+  "radius": {
+    "title": "Köşe kavisleri (Radius)",
+    "desc": "Arayüz elemanlarının köşe yuvarlaklığı"
+  },
+  "colors": {
+    "title": "Renk Temaları",
+    "desc": "Hazır rəng palitrası seçin ve ya öz temanuzu yaradın.",
+    "search": "Tema ara..."
+  },
+  "delete_theme": "Sil",
+  "wallpaper": {
+    "title": "Duvar Kağıtları Klasörü",
+    "desc": "Duvar kağıtlarının aranacağı klasör",
+    "select_dir": "Klasör seç...",
+    "select_wallpaper": "Fon şəkli seç",
+    "no_wallpaper_selected": "Fon şəkli seçilməyib"
+  }
+}

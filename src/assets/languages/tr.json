@@ -1,0 +1,1249 @@
+{
+  "guide": {
+    "about": {
+      "title": "Atlantic",
+      "loading": "Yükleniyor...",
+      "unknown": "Bilinmiyor",
+      "version_by": "v{version} • by @{author}",
+      "hardware": {
+        "device_name": "Cihaz adı",
+        "processor": "İşlemci",
+        "graphics": "Grafik",
+        "memory": "Hafıza",
+        "disk_capacity": "Disk kapasitesi",
+        "integrated_graphics": "Entegre grafikler"
+      },
+      "system": {
+        "os_name": "İşletim sistemi adı",
+        "kernel_version": "Çekirdek sürümü",
+        "desktop": "Masaüstü",
+        "shell": "Kabuk",
+        "uptime": "Çalışma süresi",
+        "default_os": "Linux"
+      },
+      "github_repo": "kurbaga3131/atlantic"
+    },
+    "tabs": {
+      "welcome": "Hoş geldin",
+      "general": "Genel",
+      "display": "Görüntülemek",
+      "bar": "Çubuk",
+      "launcher": "Başlatıcı",
+      "theme": "Tema",
+      "notifications": "Bildirimler",
+      "idle": "Boşta",
+      "wellbeing": "Refah",
+      "tutorial": "öğretici",
+      "update": "Güncelleme",
+      "about": "Hakkında",
+      "display_widgets": "Widget'lar",
+      "display_general": "Genel",
+      "osd": "Ekran Görüntüsü",
+      "dock": "Rıhtım",
+      "bar_general": "Genel",
+      "bar_modules": "Modüller",
+      "bar_side_modules": "Yan modüller"
+    },
+    "launcher": {
+      "position": {
+        "title": "Ekran konumu",
+        "desc": "Başlatıcının hangi ekran kenarına ekleneceğini seçin",
+        "top": "Tepe",
+        "bottom": "Alt",
+        "left": "Sol",
+        "right": "Sağ",
+        "center": "Merkez"
+      },
+      "width": {
+        "title": "Başlatıcı genişliği",
+        "desc": "Başlatıcı penceresinin piksel cinsinden toplam genişliği"
+      },
+      "items": {
+        "title": "Görünür öğeler",
+        "desc": "Aynı anda görüntülenen arama sonuçlarının sayısı"
+      },
+      "terminal": {
+        "title": "Terminal komutu",
+        "desc": "> yürütmeler için kullanılan komut öneki (ör. kitty -e, alacritty -e, foot -e)"
+      },
+      "smart_ranking": {
+        "title": "Başlatıcıdaki öğelerin akıllı şekilde sıralanması",
+        "desc": "Uygulamaları kullanıma ve bu uygulamalarda geçirilen süreye göre sıralayın"
+      },
+      "test": "Başlatıcıyı aç"
+    },
+    "notifications": {
+      "dnd": {
+        "title": "Rahatsız etmeyin",
+        "desc": "Kritik uyarılar dışındaki açılır bildirimleri yoksay"
+      },
+      "position": {
+        "title": "Açılır pencere konumu",
+        "desc": "Bildirim açılır pencerelerinin ekranda nerede görüneceğini seçin",
+        "top_right": "Sağ üst",
+        "top_left": "Sol üst",
+        "bottom_right": "Sağ alt",
+        "bottom_left": "Sol alt",
+        "top_center": "Üst orta",
+        "bottom_center": "Alt orta",
+        "select_on_screen": "Ekranda seçin...",
+        "close_selector": "Seçiciyi kapat"
+      },
+      "sound": {
+        "title": "Bildirim sesi",
+        "desc": "Bir bildirim geldiğinde sesli ipucu çal"
+      },
+      "sound_file": {
+        "title": "Ses efekti",
+        "desc": "Gelen uyarılar için çalınan sesi seçin"
+      },
+      "empty_graphic": {
+        "title": "Boş merkez animasyonu",
+        "desc": "Uyuyan kedi grafiğini boş olduğunda bildirim merkezinde görüntüle"
+      },
+      "test": "Test bildirimi",
+      "test_desc": "Bu bir deneme bildirimidir"
+    },
+    "idle": {
+      "enabled": {
+        "title": "Boşta sistemi etkinleştir",
+        "desc": "Güç yönetimini etkinleştirin ve zaman aşımlarını kilitleyin"
+      },
+      "manual_inhibit": {
+        "title": "Rahatsız etmeyin (uyanık kalın)",
+        "desc": "Sistemin rölantide çalışmasını manuel olarak önleyin"
+      },
+      "mpris_inhibit": {
+        "title": "Medya oynatmayı engelle",
+        "desc": "Medya oynatılırken boşta kalan eylemleri önleyin"
+      },
+      "respect_inhibitors": {
+        "title": "Uygulama inhibitörlerine saygı gösterin",
+        "desc": "Uygulamalardaki wayland rölanti engelleyici kilitlerini onurlandırın"
+      },
+      "pipeline_notice": "Sıra: Ekranı karart < oturumu kilitle < ekranı kapat < askıya al. Bu emri ihlal eden eylemler hariç tutulur.",
+      "order_violation": "Hariç tutuldu",
+      "actions_header": {
+        "title": "Boşta kalma zaman aşımı nesneleri",
+        "desc": "Zaman aşımlarını, yerleşik tetikleyicileri ve özel komutları yapılandırın"
+      },
+      "action_name_placeholder": "İşlem adı",
+      "command_placeholder": "Yürütülecek komut",
+      "custom_action_default": "Özel boşta kalma eylemi",
+      "custom_action_fallback": "Boşta kalma eylemi",
+      "warning_command": {
+        "title": "Uyarı komutu",
+        "desc": "Eylemden önce yürütülecek ofset ve komut",
+        "placeholder": "örneğin bildir-'uyarı' gönder"
+      },
+      "before_command": {
+        "title": "Komuttan önce",
+        "desc": "Eylem tetiklenmeden hemen önce yürütülür",
+        "placeholder": "örneğin oynatıcıctl duraklatma"
+      },
+      "resume_command": {
+        "title": "Komutu sürdür",
+        "desc": "Kullanıcı etkinliği devam ettiğinde yürütülür",
+        "placeholder": "örneğin bildirim-gönder 'devam ettirildi'"
+      },
+      "dim": {
+        "title": "Karartılmış ekran",
+        "desc": "Çıkışı karartmadan önceki süre"
+      },
+      "dpms": {
+        "title": "Ekran kapalı (DPMS)",
+        "desc": "Ekranı tamamen kapatmadan önceki süre"
+      },
+      "lock": {
+        "title": "Oturumu kilitle",
+        "desc": "Şifre istemeden önceki süre"
+      },
+      "suspend": {
+        "title": "Sistem askıya alma",
+        "desc": "Makineyi uyku moduna geçirmeden önceki süre"
+      },
+      "hooks": {
+        "title": "Kancalar (kabuk komutları)"
+      }
+    },
+    "welcome": {
+      "by_author": "by @{author}",
+      "about": "Hakkında",
+      "hold_for_tutorial": "Eğitim için basılı tutun",
+      "start_tutorial": "Eğiticiyi başlat"
+    },
+    "tutorial": {
+      "section_title": "{section} tutorial",
+      "default_desc": "Eğiticiyi başlatmak için tıklayın",
+      "start": "Başlangıç"
+    },
+    "general": {
+      "language": {
+        "title": "Dil",
+        "desc": "Sistem arayüzü dilini seçin"
+      },
+      "uiscale": {
+        "title": "Kullanıcı arayüzü ölçeği",
+        "desc": "Genel arayüz ölçek faktörünü ayarlayın"
+      },
+      "avatar": {
+        "title": "Profil resmi",
+        "desc": "Profil resmini seç",
+        "select": "Seçme",
+        "select_image_path": "Resim yolunu seçin..."
+      },
+      "mutesfx": {
+        "title": "SFX'i sessize al",
+        "desc": "Kullanıcı arayüzü ses efektlerini devre dışı bırakın"
+      },
+      "sfxvolume": {
+        "title": "Sfx efektlerinin ses düzeyini değiştirme",
+        "desc": "Sistem ses çıkışlarını etkilemez"
+      },
+      "quickactions": {
+        "title": "Hızlı işlemler",
+        "desc": "Kayan hızlı işlem katmanını etkinleştir"
+      },
+      "location": {
+        "title": "Konum",
+        "desc": "Otomatik güneş programı ve hava durumu için konumu yapılandırın",
+        "popup_title": "Konum ayrıntıları",
+        "autodetect": "Otomatik algılama",
+        "latitude": "Enlem",
+        "longitude": "Boylam",
+        "apply": "Uygula"
+      },
+      "weatherinterval": {
+        "title": "Hava durumu yoklama aralığı",
+        "desc": "Dakika cinsinden oy verme sıklığı"
+      },
+      "weatherunit": {
+        "title": "Hava birimi",
+        "desc": "Hava durumu göstergeleri için sıcaklık ölçeği",
+        "celsius": "santigrat",
+        "fahrenheit": "Fahrenhayt",
+        "kelvin": "Kelvin"
+      },
+      "copysettings": {
+        "title": "Ayarları kopyala",
+        "desc": "JSON yapılandırmasını panoya kopyala",
+        "button": "Ayarları kopyala"
+      },
+      "screenshot_on_release": {
+        "title": "Fareyi bıraktığınızda bölgeyi yakalayın",
+        "desc": "Sürüklemeyi bitirir bitirmez deklanşöre basmadan ekran görüntüsünü alın"
+      }
+    },
+    "display": {
+      "bluelight": {
+        "title": "Mavi ışık filtresi",
+        "desc": "Sıcak ekran aydınlatmasını aç/kapat"
+      },
+      "enable": {
+        "title": "Bu monitörü etkinleştir",
+        "desc": "Bunu kapatmak bu monitörü devre dışı bırakır"
+      },
+      "schedule": {
+        "title": "Otomatik program",
+        "desc": "Renk sıcaklığını gün batımına ve gün doğumuna göre otomatik olarak ayarlayın."
+      },
+      "temperature": {
+        "title": "Renk sıcaklığı",
+        "desc": "Renk sıcaklığı gücünü ayarlayın"
+      },
+      "uiscale": {
+        "title": "Kullanıcı arayüzü ölçeği",
+        "desc": "Bu monitör için ekran ölçek faktörünü ayarlayın"
+      },
+      "widgets": {
+        "title": "Masaüstü widget'ları",
+        "desc": "Bu monitör için widget'ları yapılandırın ve yerleştirin",
+        "open": "Redaktörü aç",
+        "hide_bar": {
+          "title": "Çubuğu redaktörde gizle",
+          "desc": "Widget'ları redaktör modunda düzenlerken çubuğu otomatik olarak gizleyin"
+        },
+        "hide_presets": "Ön Ayarları Gizle",
+        "choose_preset": "Bir ön ayar seçin",
+        "presets": {
+          "title": "Widget Ön Ayarları"
+        },
+        "save_preset": {
+          "title": "Ön Ayarı Kaydet"
+        },
+        "preset_name_placeholder": "Ön ayar adını girin..."
+      }
+    },
+    "bar": {
+      "modules": {
+        "vis": "Görselleştirici (kava)",
+        "actions": "Eylemler",
+        "workspaces": {
+          "style": {
+            "name": {
+              "pills": "Haplar",
+              "numbers": "Sayılar",
+              "pacman": "Pacman"
+            }
+          },
+          "name": "Çalışma alanları"
+        },
+        "media": "Medya",
+        "tray": "Tepsi",
+        "keyboard": "Klavye",
+        "network": "Ağ",
+        "bluetooth": "Bluetooth",
+        "volume": "Hacim",
+        "battery": "Pil",
+        "focus": "Odak",
+        "sysmon": "Sistem monitörü",
+        "timedate": {
+          "name": "Saat ve Tarih",
+          "style": {
+            "name": {
+              "classic": "Klasik",
+              "material": "Malzeme",
+              "badge": "Nokta Matris"
+            }
+          }
+        },
+        "info": "Kayıt/zamanlayıcı",
+        "weather": "Hava durumu"
+      },
+      "position": {
+        "title": "Çubuk konumu",
+        "desc": "Çubuğun ekranınızdaki konumu",
+        "top": "Tepe",
+        "bottom": "Alt",
+        "left": "Sol",
+        "right": "Sağ"
+      },
+      "width": {
+        "title": "Çubuk genişliği",
+        "desc": "Çubuğun genişliğini yüzde olarak ayarlayın"
+      },
+      "workspaces": {
+        "title": "Görüntülenecek çalışma alanı miktarını seçin",
+        "disc": "Not: Bu, bestecideki gerçek çalışma alanı miktarını etkilemez",
+        "desc": "Görüntülenecek çalışma alanı sayısı"
+      },
+      "opacity": {
+        "title": "Çubuk opaklığı",
+        "desc": "Çubuğun opaklığını yüzde olarak ayarlayın"
+      },
+      "style": {
+        "title": "Bar stili",
+        "desc": "Modüler, katı veya dolu çubuk görünümü arasında seçim yapın",
+        "modular": "Modüler",
+        "solid": "Sağlam",
+        "fill": "Doldurmak"
+      },
+      "time": {
+        "title": "Zaman formatı",
+        "desc": "Dizeyi biçimlendir (ör. SS:dd:ss veya ss:dd AP)"
+      },
+      "guide_button": {
+        "title": "Kılavuz düğmesi",
+        "desc": "Üst çubukta kılavuz açılır tetikleyicisini görüntüle"
+      },
+      "autohide": {
+        "title": "Otomatik gizle",
+        "desc": "Fareyle üzerine gelinmediğinde çubuğu gizle"
+      },
+      "timeout": {
+        "title": "Otomatik gizleme zaman aşımı",
+        "desc": "Çubuk gizlenmeden önceki gecikme"
+      },
+      "config": {
+        "title": "Çubuk konfigürasyonu",
+        "desc": "Gruplandırmayı başlatmak için bir öğeye sağ tıklayın, eklemek için başka bir öğeye sağ tıklayın. Gruplandırılmış bir öğeyi kaldırmak için sağ tıklayın.",
+        "reset": "Sıfırla",
+        "available": "Mevcut",
+        "left": "Sol",
+        "center": "Merkez",
+        "right": "Sağ"
+      },
+      "distinct_pills": {
+        "title": "Widget'lar için modüler ve kompakt bir stili etkinleştirin",
+        "desc": "Bar modüllerinin çerçeveli bir dikdörtgene sahip olmasını ve modüler görünüme uyacak şekilde boyutlarının küçültülmesini sağlar"
+      },
+      "timedate": {
+        "show_date": {
+          "title": "Tarihi Göster",
+          "desc": "Tarih metnini saatin yanında göster"
+        }
+      }
+    },
+    "theme": {
+      "font": {
+        "title": "Yazı tipi",
+        "desc": "Atlantic tarafından kullanılan varsayılanı seçin",
+        "select": "Seçme..."
+      },
+      "radius": {
+        "title": "Sınır yarıçapı",
+        "desc": "UI öğeleri için köşe yarıçapı"
+      },
+      "colors": {
+        "title": "Renk temaları",
+        "desc": "Önceden tanımlanmış bir renk paleti ön ayarı seçin veya kendi özel temanızı oluşturun.",
+        "search": "Temaları arayın..."
+      },
+      "delete_theme": "Silmek",
+      "wallpaper": {
+        "title": "Duvar kağıdı dizini",
+        "desc": "Duvar kağıtlarını aramak için dizin",
+        "select_dir": "Dizin seç...",
+        "select_wallpaper": "Duvar kağıdını seçin",
+        "no_wallpaper_selected": "Duvar kağıdı seçilmedi"
+      }
+    },
+    "file_picker": {
+      "title": "Resim seç",
+      "input_placeholder": "Aramak...",
+      "not_found": "Hiçbir dosya bulunamadı",
+      "no_file_selected": "Hiçbir dosya seçilmedi",
+      "root": "Kök",
+      "places": {
+        "home": "Ev",
+        "downloads": "İndirilenler",
+        "pictures": "Resimler"
+      }
+    },
+    "font_picker": {
+      "title": "Bir yazı tipi seçin",
+      "input_placeholder": "Aramak...",
+      "not_found": "Hiçbir öğe bulunamadı",
+      "places": {
+        "user_fonts": "Kullanıcı yazı tipleri",
+        "system_fonts": "Sistem yazı tipleri"
+      }
+    },
+    "sound_picker": {
+      "title": "Bildirim sesini seçin",
+      "no_sound_selected": "Ses seçilmedi",
+      "places": {
+        "user_sounds": "Kullanıcı sesleri",
+        "system_sounds": "Sistem sesleri"
+      }
+    },
+    "theme_editor": {
+      "title": "Yeni renk teması",
+      "name_placeholder": "Tema adı...",
+      "preview": "Önizleme",
+      "cancel": "İptal etmek",
+      "save": "Kaydetmek",
+      "default_name": "Özel tema",
+      "colors": {
+        "base": "Temel",
+        "mantle": "Manto",
+        "crust": "Kabuk",
+        "text": "Metin",
+        "sub0": "Alt0",
+        "sub1": "Alt1",
+        "surf0": "Sörf0",
+        "surf1": "Sörf1",
+        "surf2": "Sörf2",
+        "over0": "0'dan fazla",
+        "over1": "1'den fazla",
+        "over2": "2'den fazla",
+        "blue": "Mavi",
+        "lavender": "Lavanta",
+        "sapphire": "Safir",
+        "sky": "Gökyüzü",
+        "teal": "turkuaz",
+        "green": "Yeşil",
+        "yellow": "Sarı",
+        "peach": "Şeftali",
+        "maroon": "Bordo",
+        "red": "Kırmızı",
+        "mauve": "leylak rengi",
+        "pink": "Pembe",
+        "flamingo": "Flamingo",
+        "rosewater": "Gül suyu"
+      }
+    },
+    "wellbeing": {
+      "desktop": "Masaüstü",
+      "not_available": "Yok",
+      "am": "sabah",
+      "pm": "ÖĞLEDEN SONRA",
+      "today": "Bugün",
+      "week_overview": "Haftaya genel bakış",
+      "daily_average": "Günlük ortalama",
+      "no_data": "Veri yok",
+      "same_time": "Aynı zaman",
+      "daily_usage": "Günlük kullanım",
+      "peak_hours": "Yoğun saatler",
+      "time_hm": "{h}h {m}m",
+      "time_m": "{m}m",
+      "months": {
+        "january": "Ocak",
+        "february": "Şubat",
+        "march": "Mart",
+        "april": "Nisan",
+        "may": "Mayıs",
+        "june": "Haziran",
+        "july": "Temmuz",
+        "august": "Ağustos",
+        "september": "Eylül",
+        "october": "Ekim",
+        "november": "Kasım",
+        "december": "Aralık"
+      },
+      "days": {
+        "monday": "Pazartesi",
+        "tuesday": "Salı",
+        "wednesday": "Çarşamba",
+        "thursday": "Perşembe",
+        "friday": "Cuma",
+        "saturday": "Cumartesi",
+        "sunday": "Pazar"
+      },
+      "settings": {
+        "title": "Sağlık ayarları",
+        "overall_limit": "Genel günlük limit",
+        "off": "Kapalı",
+        "app_limits": "Uygulama kullanım sınırları",
+        "app_limits_desc": "Uygulama başına maksimum günlük ödeneği ayarlayın",
+        "excluded_apps": "Hariç tutulan uygulamalar",
+        "excluded_apps_desc": "Uygulamaları bundan sonra genel izlemenin dışında tutun"
+      }
+    },
+    "update_available": "Güncelleme mevcut",
+    "osd": {
+      "capslock": {
+        "title": "Caps Lock'ta göster"
+      },
+      "numlock": {
+        "title": "Num Lock'ta göster"
+      },
+      "airplane": {
+        "title": "Uçak Modunda Göster"
+      },
+      "attach_bar": {
+        "title": "Çubuğa katı/dolgu tarzında takın",
+        "desc": "OSD açılır pencerelerini katı veya doldurma modunda durum çubuğuna yapıştırın. Devre dışı bırakıldığında OSD her zaman yapılandırılan konumda kalır."
+      },
+      "test": "OSD'yi test edin",
+      "position": {
+        "title": "Ekran Üstü Gösterimin ekran konumu",
+        "desc": "Konumu değiştirmek için önizleme kutusunu sürükleyin",
+        "select_on_screen": "Ekranda seçin...",
+        "close_selector": "Seçiciyi kapat",
+        "bottom_center": "Alt Orta",
+        "bottom_left": "Sol Alt",
+        "bottom_right": "Sağ Alt",
+        "top_center": "Üst Merkez",
+        "top_left": "Sol Üst",
+        "top_right": "Sağ Üst"
+      },
+      "orientation": {
+        "horizontal": "Yatay",
+        "vertical": "Dikey"
+      }
+    },
+    "common": {
+      "show_bar": "Çubuğu göster",
+      "unavailable": "Kullanılamıyor"
+    },
+    "position": {
+      "custom": "Gelenek"
+    },
+    "dock": {
+      "enabled": {
+        "title": "Dock'u etkinleştir",
+        "desc": "Kayan uygulama yuvasını etkinleştir"
+      },
+      "position": {
+        "title": "Bağlantı istasyonu konumu",
+        "desc": "Bağlantı birimini sabitlemek için ekranın kenarını seçin",
+        "bottom": "Alt",
+        "top": "Tepe",
+        "left": "Sol",
+        "right": "Sağ"
+      },
+      "elements": {
+        "title": "Eleman sayısı",
+        "desc": "Dock'ta görüntülenen toplam uygulama kısayolları"
+      },
+      "size": {
+        "title": "Eleman boyutu",
+        "desc": "Bireysel uygulama düğmelerinin piksel cinsinden boyutları"
+      },
+      "autohide": {
+        "title": "Otomatik gizle",
+        "desc": "Ekran kenarının üzerine gelmediğinizde dock'u gizleyin"
+      },
+      "timeout": {
+        "title": "Otomatik gizleme gecikmesi",
+        "desc": "İşaretçi ayrıldıktan sonra saklanmadan önceki süre"
+      },
+      "floating": {
+        "title": "Yüzer iskele",
+        "desc": "Yuvarlatılmış köşelerle dock'u ekranın kenarından ayırın"
+      },
+      "transparency": {
+        "title": "Bağlantı noktası şeffaflığı",
+        "desc": "Dock arka plan opaklık düzeyini ayarlayın"
+      },
+      "apps": {
+        "title": "Bağlantı İstasyonu Uygulamaları",
+        "singular": "uygulama",
+        "plural": "uygulamalar",
+        "shuffle": "Uygulamaları Karıştır",
+        "empty": "Bağlantı istasyonu için yapılandırılmış uygulama yok",
+        "enter_edit": "Düzenlemek",
+        "exit_edit": "Düzenleme modundan çık"
+      },
+      "picker": {
+        "search": "Uygulamaları ara...",
+        "done": "Tamamlamak",
+        "empty": "Eşleşen uygulama yok"
+      },
+      "opacity": {
+        "title": "Bağlantı noktası opaklığı",
+        "desc": "Dock arka plan opaklık düzeyini ayarlayın"
+      },
+      "override_bounds": {
+        "title": "Ekran sınırlarının dışındaki boyut düzeltmesini geçersiz kıl",
+        "desc": "Bağlantı istasyonu ekran sınırlarını aşsa bile özel öğe boyutunu koruyun"
+      },
+      "scrolling": {
+        "title": "Öğe kaydırmayı etkinleştir",
+        "desc": "Görünür öğeleri sınırlayın ve fare tekerleğinin veya dokunmatik yüzeyin kaydırılmasına izin verin"
+      },
+      "visible_elements": {
+        "title": "Görünür öğeler",
+        "desc": "Aynı anda görünen dock öğelerinin sayısı"
+      },
+      "hover_scale": {
+        "title": "Vurgulu ölçek efekti",
+        "desc": "Dock öğelerinin üzerine gelindiğinde büyütme düzeyi"
+      },
+      "cascade_scale": {
+        "title": "En yakın öğeleri ölçeklendir",
+        "desc": "Komşu simgelerde basamaklı büyütme"
+      },
+      "exclusive": {
+        "title": "Özel mod",
+        "desc": "Pencerelerin dock tarafından kaplanan alanı kaplamasını önleyin"
+      },
+      "on_top": {
+        "title": "Dock'u pencerelerin üstüne yerleştirin",
+        "desc": "Dock'u uygulama pencerelerinin üzerinde görünür tutun"
+      },
+      "smart_autohide": {
+        "title": "Akıllı otomatik gizleme",
+        "desc": "Dock'u yalnızca pencereler açıkken otomatik gizle, masaüstünde görünür kal"
+      }
+    }
+  },
+  "sysnotif": {
+    "battery": {
+      "app_name": "Sistem",
+      "full_title": "Pil dolu",
+      "full_body": "Pil tamamen şarj edildi (%100).",
+      "low_title": "Pil zayıf",
+      "low_body": "Battery level is at {pct}%. Please connect your charger.",
+      "critical_title": "Pil kritik",
+      "critical_body": "Battery level is at {pct}%. Connect your charger immediately."
+    }
+  },
+  "updater": {
+    "notification": {
+      "app_name": "Güncelleme",
+      "action_open_guide": "Kılavuzu aç",
+      "update_available_title": "Update available: v{remote}",
+      "update_available_body": "Current version: v{local}. Click to view changelog and update."
+    }
+  },
+  "polkit": {
+    "title": "Kimlik doğrulama gerekli",
+    "default_message": "Bir başvuru idari haklar istiyor.",
+    "default_description": "Bu eylemi süper kullanıcı olarak çalıştırmak için kimlik doğrulama gereklidir.",
+    "password_placeholder": "Şifre",
+    "error_failed": "Kimlik doğrulama başarısız oldu. Lütfen tekrar deneyin."
+  },
+  "applauncher": {
+    "search": "Aramak",
+    "placeholder": "> ile komut başlat...",
+    "tab_applications": "Uygulamalar",
+    "tab_files": "Dosyalar",
+    "placeholder_files": "Dosya ara veya yol gir..."
+  },
+  "calendar": {
+    "loading": "Yükleniyor...",
+    "loading_schedule": "Program yükleniyor...",
+    "no_events": "Planlanmış etkinlik yok.",
+    "open_web": "Web'i aç",
+    "weather": {
+      "wind": "Rüzgâr",
+      "humid": "Nemli",
+      "rain": "Yağmur",
+      "feels": "Hisler"
+    },
+    "days": {
+      "mo": "Ay",
+      "tu": "Salı",
+      "we": "Biz",
+      "th": "Bu",
+      "fr": "Fr",
+      "sa": "Sa",
+      "su": "Su"
+    }
+  },
+  "clipboard": {
+    "search": "Aramak",
+    "title": "Pano",
+    "clear": "Temizlemek",
+    "empty": "Hiçbir şey bulunamadı",
+    "recent": "Son",
+    "pinned": "Sabitlendi"
+  },
+  "lock": {
+    "status": {
+      "locked": "Kilitli",
+      "access_denied": "Erişim engellendi",
+      "authenticating": "Kimlik doğrulanıyor...",
+      "enter_pin": "PIN'i girin"
+    },
+    "power": {
+      "suspend": "Askıya almak",
+      "reboot": "Yeniden başlat",
+      "power_off": "Kapat"
+    },
+    "default_user": "Kullanıcı",
+    "unknown": "Bilinmiyor"
+  },
+  "music": {
+    "nothing_playing": "Hiçbir şey oynatılmıyor",
+    "loading": "Yükleniyor...",
+    "by_artist": "By {artist}",
+    "unknown_artist": "Bilinmeyen sanatçı",
+    "speaker": "Hoparlör",
+    "via_source": "Via {source}",
+    "offline": "Çevrimdışı",
+    "equalizer": "Ekolayzer",
+    "eq": {
+      "apply": "Uygula",
+      "saved": "Kaydedildi"
+    },
+    "presets": {
+      "flat": "Flat",
+      "bass": "Bass",
+      "treble": "Treble",
+      "vocal": "Vocal",
+      "pop": "Pop",
+      "rock": "Rock",
+      "jazz": "Jazz",
+      "classic": "Classic",
+      "custom": "Custom"
+    }
+  },
+  "network": {
+    "tabs": {
+      "ethernet": "ethernet",
+      "wifi": "Wifi",
+      "bluetooth": "Bluetooth"
+    },
+    "status": {
+      "no_ip": "IP yok",
+      "unknown": "Bilinmiyor",
+      "calculating": "Hesaplanıyor...",
+      "open": "Açık",
+      "current_device": "Geçerli cihaz",
+      "powering_on": "Güç açılıyor...",
+      "powering_off": "Kapatılıyor...",
+      "disconnected": "Bağlantı kesildi",
+      "disconnecting": "Bağlantı kesiliyor...",
+      "hold": "Tutmak...",
+      "connected": "Bağlı"
+    },
+    "actions": {
+      "unpair": "Eşlemeyi kaldır",
+      "scan": "Tara"
+    }
+  },
+  "notifications": {
+    "center": {
+      "reserved": "Gelecekteki güncellemeler için ayrılmıştır"
+    },
+    "types": {
+      "default": {
+        "fallback_summary": "Bildiri",
+        "system": "Sistem",
+        "action": "Aksiyon"
+      },
+      "weather": {
+        "fallback_summary": "Hava durumu raporu",
+        "fallback_body": "Arıza verisi sağlanmadı."
+      },
+      "screenshot": {
+        "badge": "Ekran görüntüsü",
+        "fallback_summary": "Yakalanan ekran",
+        "click_to_open": "Ekran görüntüsü klasörünü açmak için tıklayın"
+      }
+    }
+  },
+  "quickactions": {
+    "systemusage": {
+      "cpu": "İşlemci",
+      "ram": "Veri deposu",
+      "temp": "Sıcaklık",
+      "disk": "Disk",
+      "net": "Açık"
+    },
+    "timer": {
+      "tabs": {
+        "timer": "Zamanlayıcı",
+        "stopwatch": "Kronometre",
+        "pomodoro": "Pomodoro"
+      },
+      "stopwatch": {
+        "lap": "Lap {number}"
+      },
+      "pomodoro": {
+        "phases": {
+          "focus": "Odak",
+          "short_break": "Kısa mola",
+          "long_break": "Uzun mola"
+        },
+        "settings": {
+          "work": "İş (m)",
+          "short_break": "Kısa mola (m)",
+          "long_break": "Uzun mola (m)",
+          "sessions": "Oturumlar"
+        }
+      },
+      "notification": {
+        "app_name": "Quickshell zamanlayıcısı",
+        "timer_finished_title": "Zamanlayıcı bitti",
+        "timer_finished_body": "Your timer for {time} has completed.",
+        "focus_complete_title": "Odaklanma tamamlandı",
+        "focus_complete_body": "Harika iş! Hak edilmiş bir mola vermenin zamanı geldi.",
+        "break_over_title": "Kırılmak",
+        "break_over_body": "Mola süresi doldu. Odaklanmaya geri dönelim!",
+        "pomo_skipped_title": "Pomodoro atlandı",
+        "pomo_skipped_focus_body": "Odaklanma oturumu atlandı. Kırmak için hareket ediyorum.",
+        "pomo_skipped_break_body": "Mola atlandı. Odaklanmak için geri dönüyoruz."
+      }
+    }
+  },
+  "screenshot": {
+    "video_mode": "Kayda tıklayın (portal alan seçimini yönetir)",
+    "select_region": "Yakalanacak bölgeyi seçin",
+    "no_microphones": "Mikrofon yok (pulseaudio'yu yükleyin)",
+    "qr_timeout": "Tarama zaman aşımına uğradı veya başarısız oldu.",
+    "qr_not_found": "QR kodu bulunamadı.",
+    "notifications": {
+      "screenshot_app_name": "Ekran görüntüsü",
+      "recorder_app_name": "Ekran kaydedici",
+      "system_app_name": "Ekran görüntüsü sistemi",
+      "missing_deps_title": "Eksik bağımlılıklar",
+      "missing_deps_body": "Cannot start. Please install:\n{cmds}",
+      "open_folder": "Klasörü aç",
+      "recording_saved_title": "Kayıt kaydedildi",
+      "recording_saved_body": "File: {file}\nFolder: {folder}",
+      "recording_error_title": "Hata",
+      "recording_error_body": "Video dosyası kaydedilemedi.",
+      "recording_started_title": "Kayıt başladı",
+      "recording_started_body": "Durdurmak için ekran görüntüsü kısayolunuza tekrar basın.",
+      "screenshot_saved_title": "Ekran görüntüsü kaydedildi",
+      "screenshot_saved_body": "File: {file}\nFolder: {folder}"
+    }
+  },
+  "start": {
+    "title": "Atlantic",
+    "made_by": "Made by @{author}",
+    "welcome": "Hoş geldin",
+    "tagline": "Bunun için oluşturulmuş bir masaüstü kabuğu",
+    "you": "Sen",
+    "start_preview": "Start"
+  },
+  "syspanel": {
+    "user": {
+      "default_name": "Kullanıcı",
+      "default_os": "Linux",
+      "logout": "Oturumu kapat"
+    },
+    "notifications": {
+      "title": "Bildirimler",
+      "clear": "Temizlemek",
+      "silent": "Sessiz",
+      "mute": "Sesini kapatmak",
+      "empty": "Hepiniz yakalandınız."
+    },
+    "profiles": {
+      "performance": "Performans",
+      "balanced": "Dengeli",
+      "power_saver": "Güç tasarrufu"
+    },
+    "battery": {
+      "fully_charged": "Tamamen şarj edildi",
+      "charging": "Şarj etme",
+      "charging_time": "Charging • {hours}h {mins}m",
+      "discharging": "Boşaltma",
+      "left_time": "{hours}h {mins}m left",
+      "until_full": "dolana kadar",
+      "remaining": "geriye kalan"
+    },
+    "actions": {
+      "system_name": "Sistem",
+      "hibernate_error_title": "Hazırda bekletme modu kullanılamıyor",
+      "hibernate_error_body": "Hazırda bekletme bu sistemde kullanılamıyor. Lütfen takas yapılandırmanızı kontrol edin."
+    }
+  },
+  "volumepopup": {
+    "no_device": "Cihaz yok",
+    "mute": "Sesini kapatmak",
+    "master_output_volume": "Ana çıkış hacmi",
+    "no_active_streams": "Etkin akış yok",
+    "active_default": "Aktif varsayılan",
+    "tabs": {
+      "outputs": "Çıkışlar",
+      "inputs": "Girişler",
+      "streams": "Akışlar"
+    }
+  },
+  "wallpaper": {
+    "notifications": {
+      "downloading": "Duvar kağıdı indiriliyor...",
+      "type_to_search": "Aranacak bir şey yazın...",
+      "search_paused": "Arama duraklatıldı",
+      "searching_ddg": "Duvar kağıtları aranıyor...",
+      "generating_thumbnails": "Küçük resimler oluşturuluyor...",
+      "no_wallpapers_found": "Duvar kağıdı bulunamadı",
+      "videos": "Videolar",
+      "history": "Son zamanlarda uygulandı"
+    },
+    "filters": {
+      "all": "Tüm",
+      "vid": "Video",
+      "search": "Aramak",
+      "red": "Kırmızı",
+      "orange": "Turuncu",
+      "yellow": "Sarı",
+      "green": "Yeşil",
+      "blue": "Mavi",
+      "purple": "Mor",
+      "pink": "Pembe",
+      "monochrome": "Tek renkli"
+    }
+  },
+  "weather": {
+    "desc": {
+      "sunny": "Güneşli",
+      "clear": "Temizlemek",
+      "cloudy": "Bulutlu",
+      "mist": "Sis",
+      "rainy": "Yağmurlu",
+      "snow": "Kar",
+      "storm": "Fırtına",
+      "unknown": "Bilinmiyor",
+      "offline": "Çevrimdışı"
+    },
+    "days": {
+      "mon": "Pazartesi",
+      "tue": "Salı",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cuma",
+      "sat": "Doygunluk",
+      "sun": "Güneş",
+      "monday": "Pazartesi",
+      "tuesday": "Salı",
+      "wednesday": "Çarşamba",
+      "thursday": "Perşembe",
+      "friday": "Cuma",
+      "saturday": "Cumartesi",
+      "sunday": "Pazar"
+    },
+    "months": {
+      "jan": "Ocak",
+      "feb": "Şubat",
+      "mar": "Mart",
+      "apr": "Nisan",
+      "may": "Mayıs",
+      "jun": "Haziran",
+      "jul": "Temmuz",
+      "aug": "Ağustos",
+      "sep": "Eylül",
+      "oct": "Ekim",
+      "nov": "Kasım",
+      "dec": "Aralık"
+    }
+  },
+  "widgets": {
+    "wallpaper": {
+      "name": "Duvar kağıdı seçici",
+      "desc": "Masaüstü duvar kağıdına göz atın ve ayarlayın"
+    },
+    "network": {
+      "name": "Ağ ayarları",
+      "desc": "WiFi, Ethernet ve ağ bağlantılarını yönetin"
+    },
+    "volume": {
+      "name": "Ses seviyesi ve ses",
+      "desc": "Ses cihazlarını ve ses seviyelerini yönetin"
+    },
+    "guide": {
+      "name": "Ayarlar",
+      "desc": "Serpantinyum ayarları",
+      "start_preview": "Önizlemeyi başlat"
+    },
+    "calendar": {
+      "name": "Takvim ve saat",
+      "desc": "Tarihi, saati ve programı görüntüleyin"
+    },
+    "music": {
+      "name": "Medya oynatıcı",
+      "desc": "Müzik ve medya oynatmayı kontrol edin"
+    },
+    "notifications": {
+      "name": "Bildirim merkezi",
+      "desc": "Son bildirimleri ve geçmişi görüntüleyin"
+    },
+    "system": {
+      "name": "Sistem kontrolleri",
+      "desc": "Performans monitörü, güç ve hızlı ayarlar"
+    },
+    "redactor": {
+      "no_widgets_active": "Aktif widget yok",
+      "click_to_add": "Eklemek için alt araç çubuğundaki bir widget simgesini tıklayın",
+      "done": "Tamamlamak",
+      "widget_singular": "widget",
+      "widgets_plural": "widget'lar",
+      "widgets_short": "w"
+    },
+    "types": {
+      "clock": "Saat",
+      "music": "Müzik",
+      "weather": "Hava durumu",
+      "image": "Resim",
+      "visualizer": "Görüntüleyici",
+      "user": "Kullanıcı",
+      "usage": "Kullanım",
+      "battery": "Pil"
+    },
+    "variants": {
+      "digital": "Dijital",
+      "analog": "Analog",
+      "full": "Tam dolu",
+      "minimal": "Asgari",
+      "round": "Yuvarlak",
+      "compact": "Kompakt",
+      "rect": "Düz",
+      "rounded": "Yuvarlak",
+      "bars": "Barlar",
+      "continuous": "Sürekli",
+      "default": "Varsayılan",
+      "material": "Malzeme",
+      "materialAnalog": "Malzeme Analogu",
+      "lumen": "Lümen"
+    },
+    "presets": {
+      "minimal": {
+        "name": "Asgari"
+      },
+      "media_station": {
+        "name": "Medya istasyonu"
+      },
+      "dashboard": {
+        "name": "Kontrol Paneli"
+      }
+    }
+  },
+  "cli": {
+    "usage": "Kullanım: atlantic [komut] [seçenekler...]",
+    "description": "Wayland dizgicileri için bir masaüstü kabuğu.",
+    "commands": "Komutlar:",
+    "script_commands": "Komut dosyası komutları:",
+    "launch_desc": "Bağımsız bileşenleri başlatın (başlat, widgetredactor)",
+    "msg_desc": "Komutları veya çalışma alanı anahtarlarını kullanıcı arayüzü yöneticisine gönderme",
+    "ipc_desc": "IPC çağrılarını doğrudan kabuğa iletin",
+    "kill_desc": "Çalışan arka plan programını temiz bir şekilde durdurun",
+    "options": "Seçenekler:",
+    "verbose_desc": "Ayrıntılı günlük çıktısını etkinleştir",
+    "version_desc": "Sürüm bilgilerini görüntüleyin ve çıkın",
+    "help_desc": "Bu yardım mesajını göster ve çık",
+    "examples": "Örnekler:",
+    "daemon_stopped": "Atlantic arka plan programı durduruldu.",
+    "starting_daemon": "Daemon çalışmıyor. Arka planda atlanticd başlatılıyor...",
+    "error_missing_qml": "Hata: Başlatılacak hedef eksik.",
+    "launch_usage": "Kullanım: atlantic lansmanı <start|widgetredactor> [args...]",
+    "error_qml_not_found": "Error: could not resolve {NAME}.qml in {DIR}",
+    "error_shell_qml_not_found": "Error: could not resolve path to shell.qml in {DIR}",
+    "error_unknown_command": "Error: unknown command '{CMD}'.",
+    "error_unknown_target": "Error: unknown target '{TARGET}'.",
+    "launch_help": {
+      "usage": "Kullanım: atlantic lansmanı <start|widgetredactor> [argümanlar...]",
+      "description": "Bağımsız bileşenleri doğrudan koşucu modunda başlatın.",
+      "available_targets": "Mevcut hedefler:",
+      "target_start": "Başlangıç ​​kurulumu arayüzünü başlatın",
+      "target_widgetredactor": "Masaüstü widget düzenleyici arayüzünü başlatın"
+    },
+    "msg_help": {
+      "usage": "Kullanım: atlantic msg <komut|çalışma alanı> [argümanlar...]",
+      "description": "Düzen, çalışma alanı ve pencere yönetimi mesajlarını doğrudan gönderin.",
+      "available_commands": "Mevcut mesajlar:",
+      "cmd_workspace": "<num> çalışma alanına geçiş yapın (etkin pencereyi göndermek için 'move' ifadesini ekleyin)",
+      "cmd_open": "Yönetilen bir kullanıcı arayüzü panelini açın (ağ, kılavuz, duvar kağıdı, başlatıcı)",
+      "cmd_toggle": "Yönetilen bir kullanıcı arayüzü panelini açın/kapatın",
+      "cmd_close": "Herhangi bir etkin kabuk kaplamasını kapatın"
+    },
+    "ipc_help": {
+      "usage": "Kullanım: atlantic ipc çağrısı <hedef> <yöntem> [argümanlar...]",
+      "description": "Çalışan quickshell örneğine doğrudan bir IPC çağrısı gönderin."
+    },
+    "scripts": {
+      "exit": "Grafik oturumunu sonlandırın ve besteciden çıkın",
+      "lock": "Kilit ekranı arayüzünü etkinleştirin",
+      "volume": "Varsayılan ses havuzu/kaynak ses seviyesini ve sessiz durumlarını kontrol edin",
+      "reload": "Quickshell masaüstü öğelerini yeniden yüklemeye zorla",
+      "weather": "Hava durumu tahmini verilerini ve önbelleklerini alın ve yönetin",
+      "location": "Coğrafi koordinatları alma ve güncelleme",
+      "screenshot": "Ekran görüntülerini yakalayın, video kaydedin veya QR kodlarını ayrıştırın",
+      "brightness": "Arka ışık ekranının parlaklığını ayarlayın",
+      "current_focus": "Etkin pencere odağı değişikliklerini izleyin ve günlüğe kaydedin",
+      "monitors_detect": "Etkin ekran çıktılarını ve yenileme hızlarını sorgulama",
+      "location_manual": "Coğrafi koordinatları ve saat dilimini manuel olarak ayarlayın",
+      "blue_light_filter": "Renk sıcaklığını ve otomatik gündüz/gece programını ayarlayın",
+      "translate": "Anında metin ve seçim çevirmeni"
+    }
+  },
+  "daemon": {
+    "already_running": "Daemon zaten çalışıyor. Çıkılıyor...",
+    "shutting_down": "Atlantic arka plan programı kapatılıyor...",
+    "launching": "Atlantic arka plan programı başlatılıyor...",
+    "cli": {
+      "usage": "Kullanım: atlanticd <komut> [seçenekler...]",
+      "description": "Atlantic masaüstü kabuğu için arka plan hizmeti arka plan programı.",
+      "commands": "Komutlar:",
+      "cmd_start": "Daemon hizmetini başlatın ve arka plan çalışanlarını başlatın",
+      "cmd_stop": "Çalışan daemon hizmetini durdurun",
+      "cmd_status": "Daemon hizmetinin çalışma durumunu kontrol edin",
+      "options": "Seçenekler:",
+      "opt_verbose": "Ayrıntılı çıktı günlüğünü etkinleştir",
+      "opt_version": "Sürüm bilgisini göster ve çık",
+      "opt_help": "Bu yardım mesajını göster ve çık",
+      "stopped": "Atlantic arka plan programı durduruldu.",
+      "status_running": "Atlantic daemon is running (PID: {PID}).",
+      "status_stopped": "Atlantic arka plan programı çalışmıyor.",
+      "unknown_arg": "Unknown argument: {ARG}"
+    }
+  },
+  "installer": {
+    "auth": {
+      "enter_code": "Kurulum erişim kodunu girin:",
+      "error_interactive": "Hata: Kimlik doğrulama için etkileşimli terminal gerekli.",
+      "error_empty": "Kimlik doğrulama başarısız oldu: Erişim kodu boş olamaz.",
+      "error_default": "Kimlik doğrulama başarısız oldu: Geçersiz veya tükenmiş erişim kodu.",
+      "error_failed": "Kimlik doğrulama başarısız oldu.",
+      "access_granted": "Access granted. ({active}/{max} users activated this code)"
+    },
+    "os": {
+      "error_root": "Hata: Bu betiği doğrudan root/sudo ile çalıştırmayın. Normal kullanıcı olarak çalıştırın.",
+      "error_unsupported": "Unsupported OS ({os}). Atlantic strictly supports arch linux and derivatives.",
+      "error_not_found": "İşletim sistemi algılanamıyor. /etc/os-release bulunamadı.",
+      "unknown_cpu": "Bilinmeyen CPU",
+      "unknown_gpu": "Bilinmeyen / sanal makine",
+      "default_os": "Arch Linux"
+    },
+    "ui": {
+      "user": "Kullanıcı:",
+      "os": "İşletim Sistemi:",
+      "cpu": "İŞLEMCİ:",
+      "gpu": "GPU:",
+      "target_version": "Hedef sürüm:",
+      "version_to_update": "Güncellenecek sürüm:",
+      "install_mode": "Kurulum modu:",
+      "github": "GitHub:",
+      "twitter": "Twitter'da:",
+      "reddit": "Reddit:",
+      "telegram": "Telgraf:",
+      "donate": "Bağış yapmak:",
+      "donate_sub": "(Projeyi destekleyin!)",
+      "packages_prompt": "Paketler >",
+      "packages_header": "Geri dönmek için esc veya enter tuşuna basın",
+      "package_missing": "{pkg} (missing - will be installed)",
+      "package_installed": "{pkg} (installed)",
+      "compositors_title": "=== Hedef birleştiricileri seçin ===",
+      "installed": "(kurulu)",
+      "not_installed": "(kurulu değil)",
+      "done": "Tamamlamak",
+      "compositors_prompt": "Besteci kurulumu >",
+      "compositors_header": "Desteklenen birleştiricileri açın ve ardından tamam'ı seçin",
+      "sddm_title": "=== Ekran yöneticisi (SDDM) kurulumu ===",
+      "sddm_detected_active": "Detected active/enabled display manager: {dm}",
+      "sddm_detected_none": "Algılanan etkin/etkin ekran yöneticisi: Yok",
+      "sddm_opt_install": "SDDM'yi yükleyin ve yapılandırın (temanız için malzeme)",
+      "sddm_opt_disable": "Disable and remove '{dm}'",
+      "sddm_opt_wayland": "Wayland arka ucunu zorla",
+      "sddm_prompt": "SDDM kurulumu >",
+      "sddm_header": "Seçenekleri değiştirin ve ardından tamam'ı seçin",
+      "target_compositor_none": "Hedef oluşturucu [gerekli - hiçbiri seçilmedi]",
+      "target_compositor_selected": "Target compositor [{comps}]",
+      "target_compositor_req": "Target compositor ({label}) [required]",
+      "target_compositor_label": "Target compositor ({comps})",
+      "unsupported_compositor": "Desteklenmeyen derleyici",
+      "menu_overview": "Package installation overview ({count} core packages)",
+      "menu_sddm": "SDDM oturum açma yöneticisi",
+      "menu_wallpapers": "Duvar kağıdı paketi",
+      "menu_telemetry": "Anonim telemetri",
+      "menu_update": "Güncelle",
+      "menu_reinstall": "Yeniden yükle",
+      "menu_install": "Düzenlemek",
+      "menu_exit": "Çıkış",
+      "main_menu_prompt": "Ana menü >",
+      "main_menu_header": "Gezinmek için ok tuşlarını kullanın, seçmek için Enter'ı kullanın",
+      "error_no_compositor": "Devam etmeden önce en az bir desteklenen dizgici seçmelisiniz.",
+      "tagline": "Sizin için oluşturulmuş bir masaüstü kabuğu",
+      "support_creator": "Yaratıcıyı destekleyin:",
+      "buy_coffee": "Bu projeyi beğendiyseniz bana bir kahve almayı düşünün!",
+      "installed_success": "✔ Atlantic {ver} installed successfully.",
+      "updated_success": "✔ Atlantic {ver} updated successfully.",
+      "failed_packages": "Aşağıdaki paketler yükleme sırasında hatalarla karşılaştı:",
+      "restart_prompt": "Bilgisayarınızı yeniden başlatın veya yeniden başlatmak için 'atlantic start' komutunu çalıştırın.",
+      "ask_reboot": "Yeniden başlatmak istiyor musunuz? (Zorunlu) [y/n] ",
+      "socials": "Sosyal Medyamız"
+    },
+    "deps": {
+      "syncing": "Sistem paketleri senkronize ediliyor ve güncelleniyor (pacman -syyu)...",
+      "all_installed": "-> Tüm paketler zaten kurulu! Paket indirme aşamasını atladım.",
+      "missing_count": "-> Found {count} missing packages to install.",
+      "installing_title": "Sistem paketleri ve bağımlılıkları yükleniyor...",
+      "installing_pkg": "Installing {pkg}...",
+      "install_ok": "Successfully installed {pkg}",
+      "install_failed": "Failed to install {pkg}"
+    },
+    "deploy": {
+      "configuring_sddm": "SDDM ekran yöneticisi yapılandırılıyor...",
+      "disabling_dm": "-> Disabling conflicting display manager: {dm}",
+      "sddm_success": "-> Temanızın yüklü olduğu ve hizmetin etkinleştirildiği SDDM materyali [Tamam]"
+    }
+  },
+  "translator": {
+    "title": "Çevirmen",
+    "status_translating": "Çeviri...",
+    "speed": "Hız:",
+    "detected": "Saptanmış:",
+    "input_label": "Kaynak metin",
+    "placeholder": "Buraya metin yazın, yapıştırın veya konuşun...",
+    "chars": "karakterler",
+    "translation_label": "Çeviri",
+    "empty_prompt": "Çeviri anında burada görünecek...",
+    "recent": "Son:",
+    "failed": "Çeviri mevcut değil",
+    "quick_settings": "Hızlı değiştirme ayarları",
+    "replace_settings_title": "Hızlı seçim değiştirme",
+    "replace_settings_desc": "Seçilen metni çevirir ve yerinde değiştirir",
+    "auto_paste": "Çevrilmiş metni otomatik olarak yapıştır",
+    "auto_paste_sub": "Devre dışı bırakılırsa çeviri yalnızca panoya kopyalanır",
+    "keep_clipboard": "Çeviriyi panoda tut",
+    "keep_clipboard_sub": "Devre dışı bırakılırsa — orijinal pano içeriği yapıştırmadan sonra geri yüklenir"
+  },
+  "datetime": {
+    "full_date": "dddd, MMMM dd"
+  }
+}

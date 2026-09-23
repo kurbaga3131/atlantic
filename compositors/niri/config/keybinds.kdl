@@ -1,0 +1,78 @@
+binds {
+    Mod+Return { spawn "kitty"; }
+    Mod+F { spawn "firefox"; }
+    Mod+E { spawn "nautilus"; }
+    Mod+Backspace { toggle-overview; }
+    Mod+Q { close-window; }
+    Mod+Shift+F { toggle-window-floating; }
+
+    XF86MonBrightnessDown { spawn "atlantic" "brightness" "lower"; }
+    XF86MonBrightnessUp { spawn "atlantic" "brightness" "raise"; }
+
+    Print { spawn "atlantic" "screenshot"; }
+    Shift+Print { spawn "atlantic" "screenshot" "--edit"; }
+    Super+Print { spawn "atlantic" "screenshot" "--full"; }
+    Super+Shift+Print { spawn "atlantic" "screenshot" "--full" "--edit"; }
+
+    XF86PowerOff { spawn "atlantic" "lock"; }
+    Mod+L { spawn "atlantic" "lock"; }
+
+    Mod+Space { spawn "playerctl" "play-pause"; }
+    XF86AudioPause { spawn "playerctl" "play-pause"; }
+    XF86AudioPlay { spawn "playerctl" "play-pause"; }
+    XF86AudioPrev { spawn "playerctl" "previous"; }
+    XF86AudioNext { spawn "playerctl" "next"; }
+    XF86AudioMicMute { spawn "atlantic" "volume" "mic-toggle"; }
+    XF86AudioMute { spawn "atlantic" "volume" "mute-toggle"; }
+    XF86AudioLowerVolume { spawn "atlantic" "volume" "lower"; }
+    XF86AudioRaiseVolume { spawn "atlantic" "volume" "raise"; }
+
+    Mod+R { spawn "atlantic" "reload"; }
+    Mod+C { spawn "atlantic" "msg" "toggle" "clipboard"; }
+    Mod+D { spawn "atlantic" "msg" "toggle" "launcher"; }
+    Mod+M { spawn "atlantic" "msg" "toggle" "music"; }
+    Mod+B { spawn "atlantic" "msg" "toggle" "system"; }
+    Mod+W { spawn "atlantic" "msg" "toggle" "wallpaper"; }
+    Mod+S { spawn "atlantic" "msg" "toggle" "calendar"; }
+    Mod+N { spawn "atlantic" "msg" "toggle" "network"; }
+    Mod+V { spawn "atlantic" "msg" "toggle" "volume"; }
+    Mod+H { spawn "atlantic" "msg" "toggle" "guide"; }
+    Mod+A { spawn "atlantic" "msg" "toggle" "autohide"; }
+
+    Mod+Left { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Up { focus-window-or-workspace-up; }
+    Mod+Down { focus-window-or-workspace-down; }
+
+    Mod+Ctrl+Left { move-column-left; }
+    Mod+Ctrl+Right { move-column-right; }
+    Mod+Ctrl+Up { move-column-to-workspace-up; }
+    Mod+Ctrl+Down { move-column-to-workspace-down; }
+
+    Mod+Shift+Left { set-column-width "-5%"; }
+    Mod+Shift+Right { set-column-width "+5%"; }
+    Mod+Shift+Up { set-window-height "-5%"; }
+    Mod+Shift+Down { set-window-height "+5%"; }
+
+    Mod+1 { spawn "atlantic" "msg" "workspace" "1"; }
+    Mod+2 { spawn "atlantic" "msg" "workspace" "2"; }
+    Mod+3 { spawn "atlantic" "msg" "workspace" "3"; }
+    Mod+4 { spawn "atlantic" "msg" "workspace" "4"; }
+    Mod+5 { spawn "atlantic" "msg" "workspace" "5"; }
+    Mod+6 { spawn "atlantic" "msg" "workspace" "6"; }
+    Mod+7 { spawn "atlantic" "msg" "workspace" "7"; }
+    Mod+8 { spawn "atlantic" "msg" "workspace" "8"; }
+    Mod+9 { spawn "atlantic" "msg" "workspace" "9"; }
+    Mod+0 { spawn "atlantic" "msg" "workspace" "10"; }
+
+    Mod+Shift+1 { spawn "atlantic" "msg" "workspace" "1" "move"; }
+    Mod+Shift+2 { spawn "atlantic" "msg" "workspace" "2" "move"; }
+    Mod+Shift+3 { spawn "atlantic" "msg" "workspace" "3" "move"; }
+    Mod+Shift+4 { spawn "atlantic" "msg" "workspace" "4" "move"; }
+    Mod+Shift+5 { spawn "atlantic" "msg" "workspace" "5" "move"; }
+    Mod+Shift+6 { spawn "atlantic" "msg" "workspace" "6" "move"; }
+    Mod+Shift+7 { spawn "atlantic" "msg" "workspace" "7" "move"; }
+    Mod+Shift+8 { spawn "atlantic" "msg" "workspace" "8" "move"; }
+    Mod+Shift+9 { spawn "atlantic" "msg" "workspace" "9" "move"; }
+    Mod+Shift+0 { spawn "atlantic" "msg" "workspace" "10" "move"; }
+}

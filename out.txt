@@ -1,0 +1,21 @@
+{
+  "welcome": "Hoş geldiniz",
+  "general": "Genel",
+  "display": "Ekran",
+  "bar": "Çubuk (Bar)",
+  "launcher": "Başlatıcı",
+  "theme": "Tema",
+  "notifications": "Bildirimler",
+  "idle": "Boşta (Idle)",
+  "wellbeing": "Dijital Denge",
+  "tutorial": "Eğitim",
+  "update": "Güncelleme",
+  "about": "Hakkında",
+  "display_widgets": "Widgetlar",
+  "display_general": "Genel",
+  "osd": "Ekran Göstergeleri",
+  "dock": "Uygulama Rafı",
+  "bar_general": "Genel",
+  "bar_modules": "Modüller",
+  "bar_side_modules": "Yan modüller"
+}
