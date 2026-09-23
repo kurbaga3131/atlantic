@@ -55,6 +55,8 @@ REQUIRED_PKGS=(
     "ffmpeg" "fastfetch" "quickshell" "unzip" "python-websockets" "qt6-websockets"
     "grim" "playerctl" "satty" "xdg-desktop-portal-gtk" "slurp" "wmctrl" "power-profiles-daemon" "easyeffects" "nautilus" "qt5-wayland" "qt5-quickcontrols" "qt5-quickcontrols2" "qt5-graphicaleffects" "qt6-wayland"
     "qt5ct" "qt6ct" "gpu-screen-recorder" "wf-recorder" "adw-gtk-theme" "wl-gammarelay-rs" "google-chrome"
+    "loupe" "mpv" "mousepad" "evince" "file-roller"
+    "steam" "discord" "cloudflare-warp-bin" "spotify" "spicetify-cli"
 )
 
 FAILED_PKGS=()
@@ -176,6 +178,7 @@ install_dependencies() {
         yay -R --noconfirm quickshell-git 2>/dev/null || sudo pacman -Rdd --noconfirm quickshell-git 2>/dev/null || true
     fi
 
+    enable_multilib
     local target_list=("${REQUIRED_PKGS[@]}")
     for comp in "${compositors[@]}"; do
         target_list+=("$comp")
@@ -188,7 +191,7 @@ install_dependencies() {
     local GPU_RAW
     GPU_RAW=$(lspci -nn 2>/dev/null | grep -iE 'vga|3d|display' | tr '[:upper:]' '[:lower:]')
     if [[ "$GPU_RAW" == *"amd"* || "$GPU_RAW" == *"radeon"* ]]; then
-        target_list+=("mesa" "vulkan-radeon" "libva-mesa-driver" "mesa-vdpau" "xf86-video-amdgpu")
+        target_list+=("mesa" "vulkan-radeon" "libva-mesa-driver" "xf86-video-amdgpu")
     elif [[ "$GPU_RAW" == *"intel"* ]]; then
         target_list+=("mesa" "vulkan-intel" "intel-media-driver")
     elif [[ "$GPU_RAW" == *"nvidia"* ]]; then

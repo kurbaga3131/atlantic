@@ -207,6 +207,7 @@ Item {
             "sysmon": I18n.t("guide.bar.modules.sysmon"),
             "kb": I18n.t("guide.bar.modules.keyboard"),
             "wifi": I18n.t("guide.bar.modules.network"),
+            "vpn": I18n.t("guide.bar.modules.vpn") || "Cloudflare WARP",
             "bt": I18n.t("guide.bar.modules.bluetooth"),
             "vol": I18n.t("guide.bar.modules.volume"),
             "bat": I18n.t("guide.bar.modules.battery")
@@ -224,6 +225,7 @@ Item {
             "sysmon": "󰍛",
             "kb": "󰌌",
             "wifi": "󰤨",
+            "vpn": "󰒄",
             "bt": "󰂲",
             "vol": "󰕾",
             "bat": "󰁹"
@@ -241,6 +243,7 @@ Item {
             "sysmon": ThemeBackend.mauve,
             "kb": ThemeBackend.text,
             "wifi": ThemeBackend.blue,
+            "vpn": ThemeBackend.peach,
             "bt": ThemeBackend.mauve,
             "vol": ThemeBackend.peach,
             "bat": ThemeBackend.green
@@ -355,7 +358,7 @@ Item {
         add(c, centerModel);
         add(r, rightModel);
 
-        let allKeys = ["left", "workspaces", "focus", "timedate", "info", "weather", "media", "vis", "tray", "sysmon", "kb", "wifi", "bt", "vol", "bat"];
+        let allKeys = ["left", "workspaces", "focus", "timedate", "info", "weather", "media", "vis", "tray", "sysmon", "kb", "wifi", "vpn", "bt", "vol", "bat"];
         for (let i = 0; i < allKeys.length; i++) {
             if (!used[allKeys[i]]) availableModel.append(getModuleInfo(allKeys[i]));
         }
@@ -858,6 +861,7 @@ Item {
                             if (moduleId === "sysmon") return I18n.t("guide.bar.modules.sysmon");
                             if (moduleId === "kb") return I18n.t("guide.bar.modules.keyboard");
                             if (moduleId === "wifi") return I18n.t("guide.bar.modules.network");
+                            if (moduleId === "vpn") return I18n.t("guide.bar.modules.vpn") || "Cloudflare WARP";
                             if (moduleId === "bt") return I18n.t("guide.bar.modules.bluetooth");
                             if (moduleId === "vol") return I18n.t("guide.bar.modules.volume");
                             if (moduleId === "bat") return I18n.t("guide.bar.modules.battery");

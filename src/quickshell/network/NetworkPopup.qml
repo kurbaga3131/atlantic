@@ -84,9 +84,14 @@ Item {
         if (t === "wifi" || t === "wlan") t = "wifi";
         else if (t === "bt" || t === "bluetooth") t = "bt";
         else if (t === "eth" || t === "ethernet" || t === "wired") t = "eth";
+        else if (t === "vpn" || t === "warp") t = "vpn";
         if (t === "wifi" && window.wifiPresent) window.activeMode = "wifi";
         else if (t === "bt" && window.btPresent) window.activeMode = "bt";
         else if (t === "eth" && window.ethPresent) window.activeMode = "eth";
+        else if (t === "vpn" && window.vpnPresent) {
+            window.activeMode = "vpn";
+            window.rebuildVpnData();
+        }
     }
 
     property real introState: 0.0
@@ -512,6 +517,7 @@ Item {
         if (window.ethPresent) validModes.push("eth");
         if (window.wifiPresent) validModes.push("wifi");
         if (window.btPresent) validModes.push("bt");
+        if (window.vpnPresent) validModes.push("vpn");
 
         if (validModes.length > 0 && validModes.indexOf(window.activeMode) === -1) {
             window.powerAnimAllowed = false;
@@ -531,14 +537,16 @@ Item {
         onFileChanged: reload()
         onLoaded: {
             let mode = text().trim();
-            if ((mode === "wifi" || mode === "bt" || mode === "eth") && window.activeMode !== mode) {
+            if ((mode === "wifi" || mode === "bt" || mode === "eth" || mode === "vpn") && window.activeMode !== mode) {
                 if ((mode === "eth" && window.ethPresent) ||
                     (mode === "wifi" && window.wifiPresent) ||
-                    (mode === "bt" && window.btPresent)) {
+                    (mode === "bt" && window.btPresent) ||
+                    (mode === "vpn" && window.vpnPresent)) {
                     window.powerAnimAllowed = false;
                     powerAnimBlocker.restart();
                     window.ignoreNextModeFileUpdate = true;
                     window.activeMode = mode;
+                    if (mode === "vpn") window.rebuildVpnData();
                 }
             }
         }
@@ -550,6 +558,7 @@ Item {
         window.findDevices();
         window.rebuildEthData();
         window.rebuildWifiData();
+        window.rebuildVpnData();
 
         let hasCache = false;
         if (cache.lastBtJson !== "") { window.rebuildBtData(true); hasCache = true; }
@@ -559,6 +568,7 @@ Item {
             if (window.ethPresent) validModes.push("eth");
             if (window.wifiPresent) validModes.push("wifi");
             if (window.btPresent) validModes.push("bt");
+            if (window.vpnPresent) validModes.push("vpn");
 
             if (validModes.length > 0 && validModes.indexOf(window.activeMode) === -1) {
                 window.activeMode = validModes[0];
@@ -574,6 +584,7 @@ Item {
             resetAndPlayIntro();
             window.startBtScan();
             window.startWifiScan();
+            window.rebuildVpnData();
         }
     }
 
@@ -581,10 +592,24 @@ Item {
 
     readonly property color sharedAccent: Qt.lighter(ThemeBackend.sapphire, 1.15)
     readonly property color btAccent: ThemeBackend.mauve
+    readonly property color vpnAccent: (typeof ThemeBackend !== "undefined" && ThemeBackend.peach !== undefined) ? ThemeBackend.peach : "#f5a97f"
 
     property string activeMode: "wifi"
-    readonly property color activeColor: activeMode === "bt" ? window.btAccent : window.sharedAccent
+    readonly property color activeColor: activeMode === "bt" ? window.btAccent : (activeMode === "vpn" ? window.vpnAccent : window.sharedAccent)
     readonly property color activeGradientSecondary: Qt.darker(window.activeColor, 1.25)
+
+    property bool vpnPresent: true
+    property bool isVpnConn: false
+    property string vpnStatus: "Disconnected"
+    property string vpnIp: ""
+    property string vpnIsp: ""
+    property string vpnMode: "1.1.1.1 + WARP"
+    property string vpnColo: ""
+    property string vpnPing: ""
+    property string vpnPower: "off"
+    property bool vpnPowerPending: false
+    property string expectedVpnPower: "off"
+    property var vpnConnected: null
 
     property var busyTasks: ({})
     property var disconnectingDevices: ({})
@@ -625,7 +650,8 @@ Item {
     Timer { id: ethPendingReset; interval: 8000; onTriggered: { window.ethPowerPending = false; window.expectedEthPower = ""; } }
     Timer { id: wifiPendingReset; interval: 8000; onTriggered: { window.wifiPowerPending = false; window.expectedWifiPower = ""; } }
     Timer { id: btPendingReset; interval: 8000; onTriggered: { window.btPowerPending = false; window.expectedBtPower = ""; } }
-    Timer { id: powerMinSpinTimer; interval: 800; onTriggered: { if (window.activeMode === "eth") window.rebuildEthData(); else if (window.activeMode === "wifi") window.rebuildWifiData(); else window.rebuildBtData(false); } }
+    Timer { id: vpnPendingReset; interval: 8000; onTriggered: { window.vpnPowerPending = false; window.expectedVpnPower = ""; } }
+    Timer { id: powerMinSpinTimer; interval: 800; onTriggered: { if (window.activeMode === "eth") window.rebuildEthData(); else if (window.activeMode === "wifi") window.rebuildWifiData(); else if (window.activeMode === "vpn") window.rebuildVpnData(); else window.rebuildBtData(false); } }
 
     property bool showInfoView: false
     onShowInfoViewChanged: {
@@ -712,6 +738,8 @@ Item {
         } else if (activeMode === "wifi") {
             let wValid = !!window.wifiConnected && window.wifiConnected.ssid !== undefined;
             list = wValid ? [window.wifiConnected] : [];
+        } else if (activeMode === "vpn") {
+            list = (window.isVpnConn && window.vpnConnected) ? [window.vpnConnected] : [];
         } else {
             list = window.btConnected || [];
         }
@@ -725,11 +753,11 @@ Item {
         for (let i = 0; i < list.length && i < 5; i++) {
             let dev = list[i];
             if (!dev) continue;
-            let id = activeMode === "wifi" ? dev.ssid : (activeMode === "eth" ? dev.id : dev.mac);
+            let id = activeMode === "wifi" ? dev.ssid : ((activeMode === "eth" || activeMode === "vpn") ? dev.id : dev.mac);
             if (!id) continue;
             for (let c = 0; c < 5; c++) {
                 if (newCores[c]) {
-                    let cId = activeMode === "wifi" ? newCores[c].ssid : (activeMode === "eth" ? newCores[c].id : newCores[c].mac);
+                    let cId = activeMode === "wifi" ? newCores[c].ssid : ((activeMode === "eth" || activeMode === "vpn") ? newCores[c].id : newCores[c].mac);
                     if (cId === id) { found[c] = true; newCores[c] = dev; break; }
                 }
             }
@@ -740,12 +768,12 @@ Item {
         for (let i = 0; i < list.length && i < 5; i++) {
             let dev = list[i];
             if (!dev) continue;
-            let id = activeMode === "wifi" ? dev.ssid : (activeMode === "eth" ? dev.id : dev.mac);
+            let id = activeMode === "wifi" ? dev.ssid : ((activeMode === "eth" || activeMode === "vpn") ? dev.id : dev.mac);
             if (!id) continue;
             let isFound = false;
             for (let c = 0; c < 5; c++) {
                 if (newCores[c]) {
-                    let cId = activeMode === "wifi" ? newCores[c].ssid : (activeMode === "eth" ? newCores[c].id : newCores[c].mac);
+                    let cId = activeMode === "wifi" ? newCores[c].ssid : ((activeMode === "eth" || activeMode === "vpn") ? newCores[c].id : newCores[c].mac);
                     if (cId === id) { isFound = true; break; }
                 }
             }
@@ -809,8 +837,14 @@ Item {
         } else if (window.activeMode === "eth") {
             window.stopWifiScan();
             window.rebuildEthData();
+        } else if (window.activeMode === "vpn") {
+            window.stopWifiScan();
+            window.rebuildVpnData();
         }
 
+        if (window.activeMode === "vpn") {
+            window.showInfoView = true;
+        }
         if (window.showInfoView) window.updateInfoNodes();
         window.refreshOrbitDisplay();
     }
@@ -821,7 +855,7 @@ Item {
     ListModel { id: orbitDisplayModel }
 
     function refreshOrbitDisplay() {
-        let src = (window.currentConn && window.showInfoView) ? infoListModel : (window.activeMode === "wifi" ? wifiListModel : (window.activeMode === "bt" ? btListModel : null));
+        let src = ((window.currentConn || window.activeMode === "vpn") && window.showInfoView) ? infoListModel : (window.activeMode === "wifi" ? wifiListModel : (window.activeMode === "bt" ? btListModel : null));
         let arr = [];
         if (src) {
             for (let i = 0; i < src.count; i++) arr.push(src.get(i));
@@ -935,13 +969,13 @@ Item {
         if (window.currentConn && window.activeMode === "bt") updateInfoNodes();
     }
 
-    readonly property bool currentPower: activeMode === "eth" ? window.ethPower === "on" : (activeMode === "wifi" ? window.wifiPower === "on" : window.btPower === "on")
+    readonly property bool currentPower: activeMode === "eth" ? window.ethPower === "on" : (activeMode === "wifi" ? window.wifiPower === "on" : (activeMode === "vpn" ? window.vpnPower === "on" : window.btPower === "on"))
     onCurrentPowerChanged: { syncCores(); }
 
-    readonly property bool currentPowerPending: activeMode === "eth" ? window.ethPowerPending : (activeMode === "wifi" ? window.wifiPowerPending : window.btPowerPending)
-    readonly property bool currentConn: activeMode === "eth" ? window.isEthConn : (activeMode === "wifi" ? window.isWifiConn : window.isBtConn)
+    readonly property bool currentPowerPending: activeMode === "eth" ? window.ethPowerPending : (activeMode === "wifi" ? window.wifiPowerPending : (activeMode === "vpn" ? window.vpnPowerPending : window.btPowerPending))
+    readonly property bool currentConn: activeMode === "eth" ? window.isEthConn : (activeMode === "wifi" ? window.isWifiConn : (activeMode === "vpn" ? window.isVpnConn : window.isBtConn))
 
-    readonly property var currentObjList: activeMode === "eth" ? (window.isEthConn ? [window.ethConnected] : []) : (activeMode === "wifi" ? (window.isWifiConn ? [window.wifiConnected] : []) : window.btConnected)
+    readonly property var currentObjList: activeMode === "eth" ? (window.isEthConn ? [window.ethConnected] : []) : (activeMode === "wifi" ? (window.isWifiConn ? [window.wifiConnected] : []) : (activeMode === "vpn" ? (window.isVpnConn && window.vpnConnected ? [window.vpnConnected] : []) : window.btConnected))
 
     readonly property string orbitSourceKey: (window.currentConn && window.showInfoView)
         ? ("info_" + window.activeMode)
@@ -966,6 +1000,8 @@ Item {
             let wConn = window.wifiConnected;
             if (Array.isArray(wConn)) wConn = wConn[0];
             cList = (!!wConn && wConn.ssid !== undefined) ? [wConn] : [];
+        } else if (window.activeMode === "vpn") {
+            cList = window.vpnConnected ? [window.vpnConnected] : [];
         } else {
             cList = window.btConnected || [];
         }
@@ -992,6 +1028,21 @@ Item {
                     nodes.push({ id: "sec_" + i, name: obj.security || I18n.t("network.status.open") || "Open", icon: "󰦝", action: "", isInfoNode: true, isActionable: false, parentIndex: cIndex });
                     if (obj.ip) nodes.push({ id: "ip_" + i, name: obj.ip, icon: "󰩟", action: "", isInfoNode: true, isActionable: true, cmdStr: "printf '%s' " + window.shEsc(obj.ip) + " | wl-copy", parentIndex: cIndex });
                     if (obj.freq) nodes.push({ id: "freq_" + i, name: obj.freq, icon: "󰖧", action: "", isInfoNode: true, isActionable: false, parentIndex: cIndex });
+                } else if (window.activeMode === "vpn") {
+                    if (window.vpnIp && window.vpnIp !== "") {
+                        nodes.push({ id: "vpn_ip", name: window.vpnIp, icon: "󰩟", action: "IP Address", isInfoNode: true, isActionable: true, cmdStr: "printf '%s' " + window.shEsc(window.vpnIp) + " | wl-copy", parentIndex: cIndex });
+                    }
+                    if (window.vpnIsp && window.vpnIsp !== "") {
+                        nodes.push({ id: "vpn_isp", name: window.vpnIsp, icon: "󰖂", action: "", isInfoNode: true, isActionable: false, parentIndex: cIndex });
+                    }
+                    nodes.push({ id: "vpn_mode", name: window.vpnMode || "1.1.1.1 + WARP", icon: "󰒄", action: "", isInfoNode: true, isActionable: false, parentIndex: cIndex });
+                    if (window.vpnColo && window.vpnColo !== "") {
+                        nodes.push({ id: "vpn_colo", name: window.vpnColo, icon: "󰍎", action: "", isInfoNode: true, isActionable: false, parentIndex: cIndex });
+                    }
+                    if (window.vpnPing && window.vpnPing !== "") {
+                        nodes.push({ id: "vpn_ping", name: window.vpnPing, icon: "󰓅", action: "", isInfoNode: true, isActionable: false, parentIndex: cIndex });
+                    }
+                    nodes.push({ id: "action_refresh_vpn", name: I18n.t("network.actions.refresh") || "Refresh", icon: "󰑐", action: "", isInfoNode: true, isActionable: true, cmdStr: "REFRESH_VPN", parentIndex: -1 });
                 } else if (obj.mac) {
                     nodes.push({ id: "bat_" + obj.mac, name: (obj.battery || "0") + "%", icon: "󰥉", action: "", isInfoNode: true, isActionable: false, parentIndex: cIndex });
                     if (obj.profile) {
@@ -1001,12 +1052,12 @@ Item {
                     nodes.push({ id: "forget_" + obj.mac, name: I18n.t("network.actions.unpair") || "Unpair", icon: "󰆴", action: "", isInfoNode: true, isActionable: true, cmdStr: "BT_FORGET_" + obj.mac, parentIndex: cIndex });
                 }
             }
-            if (window.activeMode !== "eth") {
+            if (window.activeMode !== "eth" && window.activeMode !== "vpn") {
                 nodes.push({ id: "action_scan", name: I18n.t("network.actions.scan") || "Scan", icon: "󰍉", action: "", isInfoNode: true, isActionable: true, cmdStr: "TOGGLE_VIEW", parentIndex: -1 });
             }
         }
 
-        if (window.isListLocked && window.activeMode !== "eth") window.nextInfoList = nodes;
+        if (window.isListLocked && window.activeMode !== "eth" && window.activeMode !== "vpn") window.nextInfoList = nodes;
         else { window.syncModel(infoListModel, nodes); window.nextInfoList = null; window.refreshOrbitDisplay(); }
     }
 
@@ -1366,6 +1417,71 @@ Item {
         }
     }
 
+    Process {
+        id: vpnInfoPoller
+        command: ["bash", window.scriptsDir + "/warp_panel_logic.sh", "status"]
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    let text = this.text.trim();
+                    if (text !== "") {
+                        let data = JSON.parse(text);
+                        let wasConn = window.isVpnConn;
+                        window.vpnStatus = data.status || "Disconnected";
+                        window.isVpnConn = !!data.connected;
+                        window.vpnPower = (data.connected || data.status === "Connecting") ? "on" : "off";
+                        window.vpnIp = data.ip || "";
+                        window.vpnIsp = data.isp || "";
+                        window.vpnMode = data.mode || "1.1.1.1 + WARP";
+                        window.vpnColo = data.colo || "";
+                        window.vpnPing = data.ping || "";
+                        if (window.isVpnConn) {
+                            window.vpnConnected = {
+                                id: "warp",
+                                ssid: "Cloudflare WARP",
+                                name: "Cloudflare WARP",
+                                status: "Connected",
+                                icon: "󰒄"
+                            };
+                            if (!wasConn && window.activeMode === "vpn") Sounds.playSfx("network/connect.wav");
+                        } else {
+                            window.vpnConnected = null;
+                        }
+                        window.syncCores();
+                        if (window.activeMode === "vpn") {
+                            window.updateInfoNodes();
+                        }
+                    }
+                } catch(e) {}
+                window.vpnPowerPending = false;
+            }
+        }
+    }
+
+    function rebuildVpnData() {
+        if (!vpnInfoPoller.running) {
+            vpnInfoPoller.running = true;
+        }
+    }
+
+    function toggleVpn(enable) {
+        window.vpnPowerPending = true;
+        window.expectedVpnPower = enable ? "on" : "off";
+        if (enable) Sounds.playSfx("network/power_on.wav"); else Sounds.playSfx("network/power_off.wav");
+        powerMinSpinTimer.restart();
+        let cmd = enable ? "connect" : "disconnect";
+        Quickshell.execDetached(["bash", "-c", window.scriptsDir + "/warp_panel_logic.sh " + cmd + " >/dev/null 2>&1"]);
+        vpnRecheckTimer.restart();
+    }
+
+    Timer {
+        id: vpnRecheckTimer
+        interval: 1000
+        repeat: false
+        onTriggered: window.rebuildVpnData()
+    }
+
     Timer {
         id: mainPollerTimer
         interval: (Object.keys(window.busyTasks).length > 0 || Object.keys(window.disconnectingDevices).length > 0) ? 1000 : 3000
@@ -1376,9 +1492,12 @@ Item {
             tick = (tick + 1) % 4;
             if (window.activeMode === "bt") {
                 if (!btProfilePoller.running) btProfilePoller.running = true;
+            } else if (window.activeMode === "vpn") {
+                window.rebuildVpnData();
             }
             if (tick === 0) {
                 if (window.activeMode !== "bt" && !btProfilePoller.running) btProfilePoller.running = true;
+                if (window.activeMode !== "vpn") window.rebuildVpnData();
             }
         }
     }
@@ -1670,7 +1789,7 @@ Item {
                             NumberAnimation { duration: 1400; easing.type: Easing.OutExpo }
                         }
 
-                        property real multiShift: window.activeMode === "wifi" || window.activeMode === "eth" ? 0.0 : window.multiTransitionState
+                        property real multiShift: (window.activeMode === "wifi" || window.activeMode === "eth" || window.activeMode === "vpn") ? 0.0 : window.multiTransitionState
 
                         width: window.currentPower ? (window.s(170) - (window.s(25) * multiShift) - (window.s(12) * Math.max(0, window.smoothedActiveCoreCount - 2))) : window.s(140)
                         height: width
@@ -1684,20 +1803,20 @@ Item {
                         property real myOrbitRadiusX: window.s(150) + (window.activeCoreCount > 2 ? window.s(15) : 0)
                         property real myOrbitRadiusY: window.s(90) + (window.activeCoreCount > 2 ? window.s(12) : 0)
 
-                        x: window.activeMode === "eth" ? (orbitContainer.width / 2 - width / 2) : ((orbitContainer.width / 2 - width / 2) + (Math.cos(coreOrbitAngle) * myOrbitRadiusX * multiShift * activeTransition))
-                        y: window.activeMode === "eth" ? (orbitContainer.height / 2 - height / 2) : ((orbitContainer.height / 2 - height / 2) + (Math.sin(coreOrbitAngle) * myOrbitRadiusY * multiShift * activeTransition))
+                        x: (window.activeMode === "eth" || window.activeMode === "vpn") ? (orbitContainer.width / 2 - width / 2) : ((orbitContainer.width / 2 - width / 2) + (Math.cos(coreOrbitAngle) * myOrbitRadiusX * multiShift * activeTransition))
+                        y: (window.activeMode === "eth" || window.activeMode === "vpn") ? (orbitContainer.height / 2 - height / 2) : ((orbitContainer.height / 2 - height / 2) + (Math.sin(coreOrbitAngle) * myOrbitRadiusY * multiShift * activeTransition))
 
                         opacity: activeTransition * window.easeOut(window.animWin(window.introState, coreIntroStart, coreIntroStart + 0.22))
                         scale: centralCore.bumpScale * (0.8 + 0.2 * activeTransition) * coreIntroProg
                         visible: opacity > 0.01
 
-                        property string myId: myDevice ? (window.activeMode === "wifi" ? (myDevice.ssid || "") : (window.activeMode === "eth" ? (myDevice.id || "") : (myDevice.mac || ""))) : "unknown"
+                        property string myId: myDevice ? (window.activeMode === "wifi" ? (myDevice.ssid || "") : ((window.activeMode === "eth" || window.activeMode === "vpn") ? (myDevice.id || "") : (myDevice.mac || ""))) : "unknown"
                         property bool isMyDisconnecting: !!window.disconnectingDevices[myId]
 
-                        property bool showScanning: isPrimary && window.currentPower && !window.currentConn && window.pendingWifiId === "" && window.activeMode !== "eth"
+                        property bool showScanning: isPrimary && window.currentPower && !window.currentConn && window.pendingWifiId === "" && window.activeMode !== "eth" && window.activeMode !== "vpn"
                         property bool showConnected: window.currentConn && hasDevice && window.pendingWifiId === ""
                         property bool showPassword: isPrimary && window.pendingWifiId !== "" && window.activeMode === "wifi"
-                        property bool showEthDisconnected: isPrimary && window.currentPower && !window.currentConn && window.activeMode === "eth"
+                        property bool showEthDisconnected: isPrimary && window.currentPower && !window.currentConn && (window.activeMode === "eth" || window.activeMode === "vpn")
 
                         MultiEffect {
                             source: centralCore
@@ -1917,8 +2036,8 @@ Item {
                                 visible: showEthDisconnected
                                 opacity: visible ? 1.0 : 0.0
                                 Behavior on opacity { enabled: window.visible; NumberAnimation { duration: 300 } }
-                                Text { Layout.alignment: Qt.AlignHCenter; font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(40); color: ThemeBackend.overlay0; text: "󰈂" }
-                                Text { Layout.alignment: Qt.AlignHCenter; font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(13); color: ThemeBackend.overlay0; text: window.currentPowerPending ? (window.expectedEthPower === "on" ? (I18n.t("network.status.powering_on") || "Powering on...") : (I18n.t("network.status.powering_off") || "Powering off...")) : (I18n.t("network.status.disconnected") || "Disconnected") }
+                                Text { Layout.alignment: Qt.AlignHCenter; font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(40); color: ThemeBackend.overlay0; text: window.activeMode === "vpn" ? "󰌆" : "󰈂" }
+                                Text { Layout.alignment: Qt.AlignHCenter; font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(13); color: ThemeBackend.overlay0; text: window.currentPowerPending ? ((window.activeMode === "vpn" ? window.expectedVpnPower : window.expectedEthPower) === "on" ? (I18n.t("network.status.powering_on") || "Powering on...") : (I18n.t("network.status.powering_off") || "Powering off...")) : (I18n.t("network.status.disconnected") || "Disconnected") }
                             }
 
                             Item {
@@ -2070,7 +2189,7 @@ Item {
                                 anchors.fill: parent
                                 enabled: window.visible
                                 hoverEnabled: window.visible
-                                cursorShape: window.currentConn && !isMyDisconnecting && !showPassword ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                cursorShape: (window.currentConn && !isMyDisconnecting && !showPassword) || (window.activeMode === "vpn" && !window.vpnConnected && !window.vpnConnecting) ? Qt.PointingHandCursor : Qt.ArrowCursor
 
                                 onEntered: {
                                     if (window.currentConn && !showPassword) {
@@ -2080,6 +2199,12 @@ Item {
                                 onExited: {
                                     if (window.currentConn && !showPassword) {
                                         window.disconnectHoverCount = Math.max(0, window.disconnectHoverCount - 1);
+                                    }
+                                }
+
+                                onClicked: {
+                                    if (window.activeMode === "vpn" && !window.vpnConnected && !window.vpnConnecting) {
+                                        window.toggleVpn(true);
                                     }
                                 }
 
@@ -2133,6 +2258,8 @@ Item {
                                         if (window.ethDevice) window.ethDevice.disconnect();
                                     } else if (window.activeMode === "wifi") {
                                         if (window.wifiDevice) window.wifiDevice.disconnect();
+                                    } else if (window.activeMode === "vpn") {
+                                        window.toggleVpn(false);
                                     }
 
                                     centralCore.disconnectFill = 0.0;
@@ -2368,6 +2495,8 @@ Item {
                                 floatCardDelegateContainer.isCardHovered = false;
                                 window.hoveredCardCount = 0;
                                 window.showInfoView = !window.showInfoView;
+                            } else if (currentCmd === "REFRESH_VPN") {
+                                window.rebuildVpnData();
                             } else if (currentIsInfoNode && currentAction === "IP Address") {
                                 let itemName = myButtonText;
                                 if (itemName && itemName !== "No IP" && itemName !== "Unknown") {
@@ -2630,7 +2759,7 @@ Item {
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottomMargin: window.s(18)
-                implicitWidth: window.s(320)
+                implicitWidth: Math.max(window.s(320), window.s(92) * availableModes.length)
                 implicitHeight: window.s(42)
                 opacity: window.easeOut(window.animWin(window.introState, 0.25, 0.50))
                 scale: 0.9 + 0.1 * window.easeBack(window.animWin(window.introState, 0.25, 0.50))
@@ -2650,6 +2779,7 @@ Item {
                     if (window.ethPresent) m.push({ mode: "eth", label: "󰈀  " + (I18n.t("network.tabs.ethernet") || "Ethernet") });
                     if (window.wifiPresent) m.push({ mode: "wifi", label: "󰤨  " + (I18n.t("network.tabs.wifi") || "Wi-Fi") });
                     if (window.btPresent) m.push({ mode: "bt", label: "󰂯 " + (I18n.t("network.tabs.bluetooth") || "Bluetooth") });
+                    if (window.vpnPresent) m.push({ mode: "vpn", label: "󰒄 " + (I18n.t("network.tabs.vpn") || "WARP") });
                     return m;
                 }
 
@@ -2786,7 +2916,16 @@ Item {
                         onClicked: {
                             if (window.pendingWifiId !== "") { window.pendingWifiId = ""; window.pendingWifiSsid = ""; }
 
-                            if (window.activeMode === "eth") {
+                            if (window.activeMode === "vpn") {
+                                if (window.vpnPowerPending) return;
+                                window.expectedVpnPower = window.vpnPower === "on" ? "off" : "on";
+                                window.vpnPowerPending = true;
+                                powerMinSpinTimer.restart();
+                                if (window.expectedVpnPower === "on") Sounds.playSfx("network/power_on.wav"); else Sounds.playSfx("network/power_off.wav");
+                                vpnPendingReset.restart();
+                                window.vpnPower = window.expectedVpnPower;
+                                window.toggleVpn(window.expectedVpnPower === "on");
+                            } else if (window.activeMode === "eth") {
                                 if (window.ethPowerPending) return;
                                 window.expectedEthPower = window.ethPower === "on" ? "off" : "on";
                                 window.ethPowerPending = true;

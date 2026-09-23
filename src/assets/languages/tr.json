@@ -292,6 +292,7 @@
         "tray": "Tepsi",
         "keyboard": "Klavye",
         "network": "Ağ",
+        "vpn": "Cloudflare WARP",
         "bluetooth": "Bluetooth",
         "volume": "Hacim",
         "battery": "Pil",
@@ -745,7 +746,8 @@
     "tabs": {
       "ethernet": "ethernet",
       "wifi": "Wifi",
-      "bluetooth": "Bluetooth"
+      "bluetooth": "Bluetooth",
+      "vpn": "WARP"
     },
     "status": {
       "no_ip": "IP yok",
@@ -762,7 +764,8 @@
     },
     "actions": {
       "unpair": "Eşlemeyi kaldır",
-      "scan": "Tara"
+      "scan": "Tara",
+      "refresh": "Yenile"
     }
   },
   "notifications": {
@@ -989,7 +992,7 @@
     },
     "guide": {
       "name": "Ayarlar",
-      "desc": "Serpantinyum ayarları",
+      "desc": "Atlantic ayarları",
       "start_preview": "Önizlemeyi başlat"
     },
     "calendar": {

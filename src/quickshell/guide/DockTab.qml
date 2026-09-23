@@ -31,7 +31,13 @@ Item {
         "smartAutohide": true,
         "autohideTimeout": 1000,
         "editing": false,
-        "apps": [],
+        "apps": [
+            { "desktop_id": "google-chrome.desktop", "name": "Google Chrome", "icon": "google-chrome", "comment": "Access the Internet" },
+            { "desktop_id": "org.gnome.Nautilus.desktop", "name": "Files", "icon": "org.gnome.Nautilus", "comment": "Access and organize files" },
+            { "desktop_id": "kitty.desktop", "name": "kitty", "icon": "kitty", "comment": "A fast, feature-rich, GPU based terminal" },
+            { "desktop_id": "org.pulseaudio.pavucontrol.desktop", "name": "Volume Control", "icon": "org.pulseaudio.pavucontrol", "comment": "Adjust the volume level" },
+            { "desktop_id": "com.github.wwmm.easyeffects.desktop", "name": "EasyEffects", "icon": "com.github.wwmm.easyeffects", "comment": "Audio Effects for PipeWire applications" }
+        ],
         "overrideBoundsCorrection": false,
         "enableScrolling": false,
         "visibleElements": 7,
@@ -67,8 +73,7 @@ Item {
     property bool currentSmartAutohide: dockSettings && dockSettings.smartAutohide !== undefined ? dockSettings.smartAutohide : true
     property bool currentAutohide: dockSettings && dockSettings.autohide !== undefined ? dockSettings.autohide : false
     property int currentAutohideTimeout: (dockSettings && dockSettings.autohideTimeout !== undefined && !isNaN(parseInt(dockSettings.autohideTimeout))) ? parseInt(dockSettings.autohideTimeout) : 1000
-    property bool currentEditing: dockSettings && dockSettings.editing !== undefined ? dockSettings.editing : false
-    property var currentAppsList: (dockSettings && Array.isArray(dockSettings.apps)) ? dockSettings.apps : []
+    property var currentAppsList: (dockSettings && Array.isArray(dockSettings.apps) && dockSettings.apps.length > 0) ? dockSettings.apps : defaultDockSettings.apps
 
     function syncSettings() {
         let s = (typeof Config !== "undefined" && typeof Config.getSetting === "function")
@@ -90,8 +95,7 @@ Item {
         dockTabRoot.currentSmartAutohide = s.smartAutohide !== undefined ? s.smartAutohide : true;
         dockTabRoot.currentAutohide = s.autohide !== undefined ? s.autohide : false;
         dockTabRoot.currentAutohideTimeout = (s.autohideTimeout !== undefined && !isNaN(parseInt(s.autohideTimeout))) ? parseInt(s.autohideTimeout) : 1000;
-        dockTabRoot.currentEditing = s.editing !== undefined ? s.editing : false;
-        dockTabRoot.currentAppsList = (s.apps && Array.isArray(s.apps)) ? s.apps : [];
+        dockTabRoot.currentAppsList = (s.apps && Array.isArray(s.apps) && s.apps.length > 0) ? s.apps : dockTabRoot.defaultDockSettings.apps;
     }
 
     function updateDockSetting(key, value) {

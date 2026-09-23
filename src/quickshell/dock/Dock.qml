@@ -87,8 +87,13 @@ Variants {
                     "autohide": false,
                     "smartAutohide": true,
                     "autohideTimeout": 1000,
-                    "editing": false,
-                    "apps": [],
+                    "apps": [
+                        { "desktop_id": "google-chrome.desktop", "name": "Google Chrome", "icon": "google-chrome", "comment": "Access the Internet" },
+                        { "desktop_id": "org.gnome.Nautilus.desktop", "name": "Files", "icon": "org.gnome.Nautilus", "comment": "Access and organize files" },
+                        { "desktop_id": "kitty.desktop", "name": "kitty", "icon": "kitty", "comment": "A fast, feature-rich, GPU based terminal" },
+                        { "desktop_id": "org.pulseaudio.pavucontrol.desktop", "name": "Volume Control", "icon": "org.pulseaudio.pavucontrol", "comment": "Adjust the volume level" },
+                        { "desktop_id": "com.github.wwmm.easyeffects.desktop", "name": "EasyEffects", "icon": "com.github.wwmm.easyeffects", "comment": "Audio Effects for PipeWire applications" }
+                    ],
                     "overrideBoundsCorrection": false,
                     "enableScrolling": false,
                     "visibleElements": 7,
@@ -608,7 +613,7 @@ Variants {
 
                 function loadApps() {
                     let customApps = rawDockSettings.apps;
-                    if (!customApps || !Array.isArray(customApps)) {
+                    if (!customApps || !Array.isArray(customApps) || customApps.length === 0) {
                         customApps = [
                             { "desktop_id": "google-chrome.desktop", "name": "Google Chrome", "icon": "google-chrome", "comment": "Access the Internet" },
                             { "desktop_id": "org.gnome.Nautilus.desktop", "name": "Files", "icon": "org.gnome.Nautilus", "comment": "Access and organize files" },
@@ -616,6 +621,11 @@ Variants {
                             { "desktop_id": "org.pulseaudio.pavucontrol.desktop", "name": "Volume Control", "icon": "org.pulseaudio.pavucontrol", "comment": "Adjust the volume level" },
                             { "desktop_id": "com.github.wwmm.easyeffects.desktop", "name": "EasyEffects", "icon": "com.github.wwmm.easyeffects", "comment": "Audio Effects for PipeWire applications" }
                         ];
+                        if (typeof Config !== "undefined" && typeof Config.setSetting === "function") {
+                            let current = JSON.parse(JSON.stringify(rawDockSettings || defaultDockSettings));
+                            current.apps = customApps;
+                            Config.setSetting("dock", current);
+                        }
                     }
                     if (dockAppsModel.count === customApps.length) {
                         let matches = true;
@@ -809,11 +819,20 @@ Variants {
                 }
 
                 function launchApp(desktopId) {
+                    if (!desktopId) return;
                     if (typeof DesktopEntries !== "undefined") {
                         let entry = DesktopEntries.byId(desktopId);
                         if (entry) {
                             entry.execute();
+                            return;
                         }
+                    }
+                    if (typeof Quickshell !== "undefined") {
+                        let cmd = desktopId.replace(".desktop", "").toLowerCase();
+                        if (cmd.includes("nautilus")) cmd = "nautilus";
+                        else if (cmd.includes("pavucontrol")) cmd = "pavucontrol";
+                        else if (cmd.includes("easyeffects")) cmd = "easyeffects";
+                        Quickshell.execDetached([cmd]);
                     }
                 }
 

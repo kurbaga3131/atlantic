@@ -59,8 +59,10 @@ install_wallpapers() {
     mkdir -p "$wallpaper_dir" 2>/dev/null || true
     mkdir -p "$avatar_dir" 2>/dev/null || true
 
-    rm -rf "$wallpaper_dir"/* 2>/dev/null || true
-    rm -rf "$avatar_dir"/* 2>/dev/null || true
+    if [[ "$INSTALL_STATE" != "current" && "$IS_REINSTALL" == "true" ]]; then
+        rm -rf "$wallpaper_dir"/* 2>/dev/null || true
+        rm -rf "$avatar_dir"/* 2>/dev/null || true
+    fi
 
     echo -e "\n\e[36m[ INFO ]\e[0m Installing wallpapers and avatars..."
 
@@ -300,61 +302,57 @@ deploy_package() {
             cp "$REPO_ROOT/version.txt" "$TARGET_BASE/src/" 2>/dev/null || true
         fi
 
-        if [ "$is_update" != "true" ]; then
-            for cfg in "${EXTRA_CONFIGS[@]}"; do
-                local src_cfg="$REPO_ROOT/config/$cfg"
-                local dest_cfg="$HOME/.config/$cfg"
-                if [ -d "$src_cfg" ]; then
-                    mkdir -p "$dest_cfg"
-                    cp -r "$src_cfg/." "$dest_cfg/"
-                elif [ -f "$src_cfg" ]; then
-                    mkdir -p "$(dirname "$dest_cfg")"
-                    cp "$src_cfg" "$dest_cfg"
+        for cfg in "${EXTRA_CONFIGS[@]}"; do
+            local src_cfg="$REPO_ROOT/config/$cfg"
+            local dest_cfg="$HOME/.config/$cfg"
+            if [ -d "$src_cfg" ]; then
+                mkdir -p "$dest_cfg"
+                cp -r "$src_cfg/." "$dest_cfg/"
+            elif [ -f "$src_cfg" ]; then
+                mkdir -p "$(dirname "$dest_cfg")"
+                cp "$src_cfg" "$dest_cfg"
+            fi
+        done
+
+        for comp in "${COMPOSITORS[@]}"; do
+            local target_config_name
+            case "$comp" in
+                hyprland) target_config_name="hypr" ;;
+                niri) target_config_name="niri" ;;
+                sway) target_config_name="sway" ;;
+                *) target_config_name="$comp" ;;
+            esac
+
+            local TARGET_CONFIG_DIR="$HOME/.config/$target_config_name"
+            local BACKUP_BASE="$HOME/.config/${target_config_name}_backup"
+            local BACKUP_DIR="$BACKUP_BASE/backup_$(date +%Y%m%d_%H%M%S)"
+
+            local SRC_COMP_DIR=""
+            if [ -d "$REPO_ROOT/compositors/$comp" ] && [ "$(ls -A "$REPO_ROOT/compositors/$comp" 2>/dev/null)" ]; then
+                SRC_COMP_DIR="$REPO_ROOT/compositors/$comp"
+            elif [ -d "$REPO_ROOT/compositor/$comp" ] && [ "$(ls -A "$REPO_ROOT/compositor/$comp" 2>/dev/null)" ]; then
+                SRC_COMP_DIR="$REPO_ROOT/compositor/$comp"
+            fi
+
+            if [ -n "$SRC_COMP_DIR" ]; then
+                if [ -d "$TARGET_CONFIG_DIR" ] && [ "$(ls -A "$TARGET_CONFIG_DIR" 2>/dev/null)" ]; then
+                    mkdir -p "$BACKUP_DIR"
+                    cp -a "$TARGET_CONFIG_DIR/." "$BACKUP_DIR/" 2>/dev/null || true
                 fi
-            done
-        fi
 
-        if [ "$is_update" != "true" ]; then
-            for comp in "${COMPOSITORS[@]}"; do
-                local target_config_name
-                case "$comp" in
-                    hyprland) target_config_name="hypr" ;;
-                    niri) target_config_name="niri" ;;
-                    sway) target_config_name="sway" ;;
-                    *) target_config_name="$comp" ;;
-                esac
+                mkdir -p "$TARGET_CONFIG_DIR"
+                cp -r "$SRC_COMP_DIR/." "$TARGET_CONFIG_DIR/"
 
-                local TARGET_CONFIG_DIR="$HOME/.config/$target_config_name"
-                local BACKUP_BASE="$HOME/.config/${target_config_name}_backup"
-                local BACKUP_DIR="$BACKUP_BASE/backup_$(date +%Y%m%d_%H%M%S)"
-
-                local SRC_COMP_DIR=""
-                if [ -d "$REPO_ROOT/compositors/$comp" ] && [ "$(ls -A "$REPO_ROOT/compositors/$comp" 2>/dev/null)" ]; then
-                    SRC_COMP_DIR="$REPO_ROOT/compositors/$comp"
-                elif [ -d "$REPO_ROOT/compositor/$comp" ] && [ "$(ls -A "$REPO_ROOT/compositor/$comp" 2>/dev/null)" ]; then
-                    SRC_COMP_DIR="$REPO_ROOT/compositor/$comp"
-                fi
-
-                if [ -n "$SRC_COMP_DIR" ]; then
-                    if [ -d "$TARGET_CONFIG_DIR" ] && [ "$(ls -A "$TARGET_CONFIG_DIR" 2>/dev/null)" ]; then
-                        mkdir -p "$BACKUP_DIR"
-                        cp -a "$TARGET_CONFIG_DIR/." "$BACKUP_DIR/" 2>/dev/null || true
+                find "$TARGET_CONFIG_DIR" -type f -o -type l | while IFS= read -r dest_file; do
+                    local rel_path="${dest_file#$TARGET_CONFIG_DIR/}"
+                    if [ ! -e "$SRC_COMP_DIR/$rel_path" ] && [ ! -L "$SRC_COMP_DIR/$rel_path" ]; then
+                        rm -f "$dest_file"
                     fi
+                done
 
-                    mkdir -p "$TARGET_CONFIG_DIR"
-                    cp -r "$SRC_COMP_DIR/." "$TARGET_CONFIG_DIR/"
-
-                    find "$TARGET_CONFIG_DIR" -type f -o -type l | while IFS= read -r dest_file; do
-                        local rel_path="${dest_file#$TARGET_CONFIG_DIR/}"
-                        if [ ! -e "$SRC_COMP_DIR/$rel_path" ] && [ ! -L "$SRC_COMP_DIR/$rel_path" ]; then
-                            rm -f "$dest_file"
-                        fi
-                    done
-
-                    find "$TARGET_CONFIG_DIR" -depth -type d -empty ! -path "$TARGET_CONFIG_DIR" -delete 2>/dev/null || true
-                fi
-            done
-        fi
+                find "$TARGET_CONFIG_DIR" -depth -type d -empty ! -path "$TARGET_CONFIG_DIR" -delete 2>/dev/null || true
+            fi
+        done
     else
         mkdir -p "$TARGET_BASE/bin" "$TARGET_BASE/src" "$BIN_DIR"
 
@@ -374,33 +372,29 @@ deploy_package() {
                 elif [[ "$file" == src/* ]]; then
                     rm -f "$TARGET_BASE/$file"
                 elif [[ "$file" == config/* ]]; then
-                    if [ "$is_update" != "true" ]; then
-                        local rel_cfg="${file#config/}"
-                        local cfg_name="${rel_cfg%%/*}"
-                        for cfg in "${EXTRA_CONFIGS[@]}"; do
-                            if [[ "$cfg" == "$cfg_name" ]]; then
-                                rm -f "$HOME/.config/$rel_cfg"
-                            fi
-                        done
-                    fi
+                    local rel_cfg="${file#config/}"
+                    local cfg_name="${rel_cfg%%/*}"
+                    for cfg in "${EXTRA_CONFIGS[@]}"; do
+                        if [[ "$cfg" == "$cfg_name" ]]; then
+                            rm -f "$HOME/.config/$rel_cfg"
+                        fi
+                    done
                 elif [[ "$file" == compositors/* || "$file" == compositor/* ]]; then
-                    if [ "$is_update" != "true" ]; then
-                        local comp_part="${file#compositor*/}"
-                        local comp_name="${comp_part%%/*}"
-                        local comp_file="${comp_part#*/}"
-                        for comp in "${COMPOSITORS[@]}"; do
-                            if [[ "$comp" == "$comp_name" ]]; then
-                                local target_config_name
-                                case "$comp" in
-                                    hyprland) target_config_name="hypr" ;;
-                                    niri) target_config_name="niri" ;;
-                                    sway) target_config_name="sway" ;;
-                                    *) target_config_name="$comp" ;;
-                                esac
-                                rm -f "$HOME/.config/$target_config_name/$comp_file"
-                            fi
-                        done
-                    fi
+                    local comp_part="${file#compositor*/}"
+                    local comp_name="${comp_part%%/*}"
+                    local comp_file="${comp_part#*/}"
+                    for comp in "${COMPOSITORS[@]}"; do
+                        if [[ "$comp" == "$comp_name" ]]; then
+                            local target_config_name
+                            case "$comp" in
+                                hyprland) target_config_name="hypr" ;;
+                                niri) target_config_name="niri" ;;
+                                sway) target_config_name="sway" ;;
+                                *) target_config_name="$comp" ;;
+                            esac
+                            rm -f "$HOME/.config/$target_config_name/$comp_file"
+                        fi
+                    done
                 fi
             done <<< "$deleted_files"
         fi
@@ -419,35 +413,31 @@ deploy_package() {
                         chmod +x "$TARGET_BASE/$file" 2>/dev/null || true
                     fi
                 elif [[ "$file" == config/* ]]; then
-                    if [ "$is_update" != "true" ]; then
-                        local rel_cfg="${file#config/}"
-                        local cfg_name="${rel_cfg%%/*}"
-                        for cfg in "${EXTRA_CONFIGS[@]}"; do
-                            if [[ "$cfg" == "$cfg_name" ]]; then
-                                mkdir -p "$(dirname "$HOME/.config/$rel_cfg")"
-                                cp "$REPO_ROOT/$file" "$HOME/.config/$rel_cfg"
-                            fi
-                        done
-                    fi
+                    local rel_cfg="${file#config/}"
+                    local cfg_name="${rel_cfg%%/*}"
+                    for cfg in "${EXTRA_CONFIGS[@]}"; do
+                        if [[ "$cfg" == "$cfg_name" ]]; then
+                            mkdir -p "$(dirname "$HOME/.config/$rel_cfg")"
+                            cp "$REPO_ROOT/$file" "$HOME/.config/$rel_cfg"
+                        fi
+                    done
                 elif [[ "$file" == compositors/* || "$file" == compositor/* ]]; then
-                    if [ "$is_update" != "true" ]; then
-                        local comp_part="${file#compositor*/}"
-                        local comp_name="${comp_part%%/*}"
-                        local comp_file="${comp_part#*/}"
-                        for comp in "${COMPOSITORS[@]}"; do
-                            if [[ "$comp" == "$comp_name" ]]; then
-                                local target_config_name
-                                case "$comp" in
-                                    hyprland) target_config_name="hypr" ;;
-                                    niri) target_config_name="niri" ;;
-                                    sway) target_config_name="sway" ;;
-                                    *) target_config_name="$comp" ;;
-                                esac
-                                mkdir -p "$(dirname "$HOME/.config/$target_config_name/$comp_file")"
-                                cp "$REPO_ROOT/$file" "$HOME/.config/$target_config_name/$comp_file"
-                            fi
-                        done
-                    fi
+                    local comp_part="${file#compositor*/}"
+                    local comp_name="${comp_part%%/*}"
+                    local comp_file="${comp_part#*/}"
+                    for comp in "${COMPOSITORS[@]}"; do
+                        if [[ "$comp" == "$comp_name" ]]; then
+                            local target_config_name
+                            case "$comp" in
+                                hyprland) target_config_name="hypr" ;;
+                                niri) target_config_name="niri" ;;
+                                sway) target_config_name="sway" ;;
+                                *) target_config_name="$comp" ;;
+                            esac
+                            mkdir -p "$(dirname "$HOME/.config/$target_config_name/$comp_file")"
+                            cp "$REPO_ROOT/$file" "$HOME/.config/$target_config_name/$comp_file"
+                        fi
+                    done
                 fi
             done <<< "$changed_files"
         fi

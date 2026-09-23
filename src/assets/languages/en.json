@@ -292,6 +292,7 @@
         "tray": "Tray",
         "keyboard": "Keyboard",
         "network": "Network",
+        "vpn": "Cloudflare WARP",
         "bluetooth": "Bluetooth",
         "volume": "Volume",
         "battery": "Battery",
@@ -745,7 +746,8 @@
     "tabs": {
       "ethernet": "Ethernet",
       "wifi": "Wi-fi",
-      "bluetooth": "Bluetooth"
+      "bluetooth": "Bluetooth",
+      "vpn": "WARP"
     },
     "status": {
       "no_ip": "No IP",
@@ -762,7 +764,8 @@
     },
     "actions": {
       "unpair": "Unpair",
-      "scan": "Scan"
+      "scan": "Scan",
+      "refresh": "Refresh"
     }
   },
   "notifications": {
