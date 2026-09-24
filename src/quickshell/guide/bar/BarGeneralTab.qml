@@ -43,7 +43,7 @@ Item {
         "modules": {
             "left": ["left", "workspaces", "media"],
             "center": ["timedate", "info", "weather"],
-            "right": ["tray", ["kb", "wifi", "bt", "vol", "bat"]]
+            "right": ["tray", "kb", "sysmon", ["wifi", "vpn", "bt", "vol", "bat"]]
         }
     }
 

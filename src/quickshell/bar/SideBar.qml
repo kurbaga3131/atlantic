@@ -67,7 +67,7 @@ Item {
     property var defaultModuleSettings: {
         "left": ["left", "workspaces", "focus"],
         "center": ["timedate", "info", "weather", "media", "vis"],
-        "right": ["tray", "sysmon", "kb", "wifi", "vpn", "bt", "vol", "bat"]
+        "right": ["tray", "kb", "sysmon", "wifi", "vpn", "bt", "vol", "bat"]
     }
 
     function parseModuleSettings(ms) {

@@ -15,7 +15,7 @@
     "position": "top",
     "width": 100,
     "opacity": 100,
-    "style": "modular", 
+    "style": "modular",
     "time": {
       "format": "HH:mm:ss"
     },
@@ -25,19 +25,20 @@
       "left": [
         "left",
         "workspaces",
-        "media" 
+        "media"
       ],
-     "center": [
+      "center": [
         [
           "timedate",
           "info",
           "weather"
         ]
-      ],      
-     "right": [
+      ],
+      "right": [
         "tray",
+        "kb",
+        "sysmon",
         [
-          "kb",
           "wifi",
           "vpn",
           "bt",
