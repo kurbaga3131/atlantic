@@ -165,6 +165,38 @@ EOF
         if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
             chown -R "$target_user:" "$user_home/.local/share/Steam" "$user_home/.steam" "$user_home/.config/spotify" 2>/dev/null || true
         fi
+
+        # Pre-bootstrap Steam client during installation so desktop click opens immediately
+        if [ ! -f "$user_home/.local/share/Steam/ubuntu12_32/steam" ]; then
+            if command -v xvfb-run &>/dev/null && command -v steam &>/dev/null; then
+                echo -e "\n\e[36m[ STEAM ]\e[0m Steam ilk kurulum dosyalari indiriliyor ve hazirlaniyor..."
+                local run_steam_cmd="xvfb-run -a steam -silent </dev/null >/dev/null 2>&1 &"
+                if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
+                    sudo -u "$SUDO_USER" -H bash -c "$run_steam_cmd"
+                else
+                    bash -c "$run_steam_cmd"
+                fi
+                local count=0
+                while [ $count -lt 60 ]; do
+                    if [ -f "$user_home/.local/share/Steam/ubuntu12_32/steam" ]; then
+                        echo -e "\e[32m[ ✓ ]\e[0m Steam kurulum dosyalari basariyla tamamlandi."
+                        sleep 2
+                        pkill -9 -fi steam 2>/dev/null || true
+                        pkill -9 -fi Xvfb 2>/dev/null || true
+                        break
+                    fi
+                    sleep 1
+                    count=$((count + 1))
+                    printf "\r\e[36m[ STEAM ]\e[0m Steam paketleri indiriliyor (%ds)..." "$count"
+                done
+                pkill -9 -fi steam 2>/dev/null || true
+                pkill -9 -fi Xvfb 2>/dev/null || true
+                echo ""
+                if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
+                    chown -R "$target_user:" "$user_home/.local/share/Steam" "$user_home/.steam" 2>/dev/null || true
+                fi
+            fi
+        fi
     fi
 
     # Spotify & Spicetify setup (permissions & marketplace)
