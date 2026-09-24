@@ -82,11 +82,11 @@ Variants {
                     "position": "bottom",
                     "onTop": true,
                     "elementSize": 44,
-                    "floating": false,
+                    "floating": true,
                     "opacity": 100,
                     "exclusive": false,
-                    "autohide": false,
-                    "smartAutohide": true,
+                    "autohide": true,
+                    "smartAutohide": false,
                     "autohideTimeout": 1000,
                     "apps": [
                         { "desktop_id": "google-chrome.desktop", "name": "Google Chrome", "icon": "google-chrome", "comment": "Access the Internet" },
@@ -176,7 +176,7 @@ Variants {
                     } else if (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings["dock.smartAutohide"] !== undefined) {
                         val = Config.rawSettings["dock.smartAutohide"];
                     }
-                    if (val === undefined || val === null) return true;
+                    if (val === undefined || val === null) return false;
                     if (typeof val === "boolean") return val;
                     if (typeof val === "string") return val.toLowerCase() === "true" || val === "1";
                     return Boolean(val);
@@ -236,7 +236,7 @@ Variants {
                     return false;
                 }
 
-                property bool autohide: rawDockSettings.autohide !== undefined ? rawDockSettings.autohide : false
+                property bool autohide: rawDockSettings.autohide !== undefined ? rawDockSettings.autohide : true
                 readonly property bool effectiveAutohide: smartAutohide ? isWorkspaceBusy : autohide
 
                 onEffectiveAutohideChanged: hideTimer.stop()
@@ -464,7 +464,7 @@ Variants {
                     return rawElementSize;
                 }
 
-                property bool rawDockFloating: rawDockSettings.floating !== undefined ? rawDockSettings.floating : false
+                property bool rawDockFloating: rawDockSettings.floating !== undefined ? rawDockSettings.floating : true
                 property bool dockFloating: rawDockFloating || (sameSideAsBar && !isBarSolid)
                 property real dockOpacitySetting: {
                     if (rawDockSettings.opacity !== undefined) return Number(rawDockSettings.opacity);

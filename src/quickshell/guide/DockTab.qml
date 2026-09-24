@@ -24,11 +24,11 @@ Item {
         "position": "bottom",
         "onTop": true,
         "elementSize": 44,
-        "floating": false,
+        "floating": true,
         "opacity": 100,
         "exclusive": false,
-        "autohide": false,
-        "smartAutohide": true,
+        "autohide": true,
+        "smartAutohide": false,
         "autohideTimeout": 1000,
         "editing": false,
         "apps": [
@@ -57,7 +57,7 @@ Item {
     property bool currentEnabled: dockSettings && dockSettings.enabled !== undefined ? dockSettings.enabled : true
     property string currentPosition: dockSettings && dockSettings.position !== undefined ? dockSettings.position : "bottom"
     property bool currentOnTop: dockSettings && dockSettings.onTop !== undefined ? Boolean(dockSettings.onTop) : true
-    property bool currentFloating: dockSettings && dockSettings.floating !== undefined ? dockSettings.floating : false
+    property bool currentFloating: dockSettings && dockSettings.floating !== undefined ? dockSettings.floating : true
     property bool currentExclusive: dockSettings && (dockSettings.exclusive !== undefined ? dockSettings.exclusive : (dockSettings.exclusiveMode !== undefined ? dockSettings.exclusiveMode : false)) ? true : false
     property real currentOpacity: {
         if (dockSettings && dockSettings.opacity !== undefined) return Number(dockSettings.opacity);
@@ -70,8 +70,8 @@ Item {
     property bool currentCascadeScale: dockSettings && dockSettings.cascadeScale !== undefined ? Boolean(dockSettings.cascadeScale) : false
     property bool currentEnableScrolling: dockSettings && dockSettings.enableScrolling !== undefined ? dockSettings.enableScrolling : false
     property int currentVisibleElements: (dockSettings && dockSettings.visibleElements !== undefined && !isNaN(parseInt(dockSettings.visibleElements)) && parseInt(dockSettings.visibleElements) > 0) ? parseInt(dockSettings.visibleElements) : 7
-    property bool currentSmartAutohide: dockSettings && dockSettings.smartAutohide !== undefined ? dockSettings.smartAutohide : true
-    property bool currentAutohide: dockSettings && dockSettings.autohide !== undefined ? dockSettings.autohide : false
+    property bool currentSmartAutohide: dockSettings && dockSettings.smartAutohide !== undefined ? dockSettings.smartAutohide : false
+    property bool currentAutohide: dockSettings && dockSettings.autohide !== undefined ? dockSettings.autohide : true
     property int currentAutohideTimeout: (dockSettings && dockSettings.autohideTimeout !== undefined && !isNaN(parseInt(dockSettings.autohideTimeout))) ? parseInt(dockSettings.autohideTimeout) : 1000
     property bool currentEditing: dockSettings && dockSettings.editing !== undefined ? dockSettings.editing : false
     property var currentAppsList: (dockSettings && Array.isArray(dockSettings.apps) && dockSettings.apps.length > 0) ? dockSettings.apps : defaultDockSettings.apps
@@ -84,7 +84,7 @@ Item {
         dockTabRoot.currentEnabled = s.enabled !== undefined ? s.enabled : true;
         dockTabRoot.currentPosition = s.position !== undefined ? s.position : "bottom";
         dockTabRoot.currentOnTop = s.onTop !== undefined ? Boolean(s.onTop) : true;
-        dockTabRoot.currentFloating = s.floating !== undefined ? s.floating : false;
+        dockTabRoot.currentFloating = s.floating !== undefined ? s.floating : true;
         dockTabRoot.currentExclusive = s.exclusive !== undefined ? s.exclusive : (s.exclusiveMode !== undefined ? Boolean(s.exclusiveMode) : false);
         dockTabRoot.currentOpacity = s.opacity !== undefined ? Number(s.opacity) : (s.transparency !== undefined ? Math.max(0, 100 - Number(s.transparency)) : 100);
         dockTabRoot.currentElementSize = (s.elementSize !== undefined && !isNaN(parseInt(s.elementSize))) ? parseInt(s.elementSize) : 44;
@@ -93,8 +93,8 @@ Item {
         dockTabRoot.currentCascadeScale = s.cascadeScale !== undefined ? Boolean(s.cascadeScale) : false;
         dockTabRoot.currentEnableScrolling = s.enableScrolling !== undefined ? s.enableScrolling : false;
         dockTabRoot.currentVisibleElements = (s.visibleElements !== undefined && !isNaN(parseInt(s.visibleElements)) && parseInt(s.visibleElements) > 0) ? parseInt(s.visibleElements) : 7;
-        dockTabRoot.currentSmartAutohide = s.smartAutohide !== undefined ? s.smartAutohide : true;
-        dockTabRoot.currentAutohide = s.autohide !== undefined ? s.autohide : false;
+        dockTabRoot.currentSmartAutohide = s.smartAutohide !== undefined ? s.smartAutohide : false;
+        dockTabRoot.currentAutohide = s.autohide !== undefined ? s.autohide : true;
         dockTabRoot.currentAutohideTimeout = (s.autohideTimeout !== undefined && !isNaN(parseInt(s.autohideTimeout))) ? parseInt(s.autohideTimeout) : 1000;
         dockTabRoot.currentEditing = s.editing !== undefined ? s.editing : false;
         dockTabRoot.currentAppsList = (s.apps && Array.isArray(s.apps) && s.apps.length > 0) ? s.apps : dockTabRoot.defaultDockSettings.apps;
