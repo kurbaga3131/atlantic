@@ -430,17 +430,78 @@ def fix_steam_loopback():
         pass
 
 def fix_steam_config():
+    import shutil
     home = os.path.expanduser("~")
+    steam_data = os.path.join(home, ".local/share/Steam")
+    steam_link_dir = os.path.join(home, ".steam")
+    steam_link = os.path.join(steam_link_dir, "steam")
+    steam_root = os.path.join(steam_link_dir, "root")
     cfg_content = "@nClientDownloadEnableHTTP2PlatformLinux 0\n@fDownloadRateImprovementToAddAnotherConnection 1.0\n"
-    for d in [os.path.join(home, ".local/share/Steam"), os.path.join(home, ".steam/steam")]:
-        try:
-            os.makedirs(d, exist_ok=True)
-            fpath = os.path.join(d, "steam_dev.cfg")
-            if not os.path.exists(fpath):
-                with open(fpath, "w") as f:
-                    f.write(cfg_content)
-        except Exception:
-            pass
+
+    try:
+        os.makedirs(steam_data, exist_ok=True)
+        os.makedirs(steam_link_dir, exist_ok=True)
+
+        # Fix "Couldn't set up Steam data":
+        # ~/.steam/steam and ~/.steam/root MUST be symlinks, NEVER directories!
+        for lpath in [steam_link, steam_root]:
+            if os.path.exists(lpath) and not os.path.islink(lpath):
+                shutil.rmtree(lpath, ignore_errors=True)
+            if not os.path.exists(lpath) and not os.path.islink(lpath):
+                try:
+                    os.symlink(steam_data, lpath)
+                except Exception:
+                    pass
+
+        # Write steam_dev.cfg to disable HTTP/2 throttling on Linux
+        fpath = os.path.join(steam_data, "steam_dev.cfg")
+        if not os.path.exists(fpath):
+            with open(fpath, "w") as f:
+                f.write(cfg_content)
+
+        # If previous installation was killed prematurely and corrupted:
+        # If steam.sh does NOT exist, clean up partial packages
+        steam_sh = os.path.join(steam_data, "steam.sh")
+        if not os.path.exists(steam_sh):
+            for bad_d in ["package", "tmp"]:
+                shutil.rmtree(os.path.join(steam_data, bad_d), ignore_errors=True)
+    except Exception:
+        pass
+
+def fix_discord_wrapper():
+    wrapper_path = "/usr/local/bin/discord"
+    wrapper_code = """#!/bin/bash
+# Atlantic Discord clean-launch wrapper: cleans up hanging zombie processes on start
+if command -v hyprctl &>/dev/null; then
+    if ! hyprctl clients -j 2>/dev/null | jq -e '.[] | select((.class // "") | test("(?i)discord|vesktop"))' >/dev/null; then
+        pkill -9 -x Discord 2>/dev/null || true
+        pkill -9 -fi /opt/discord/Discord 2>/dev/null || true
+        sleep 0.1
+    fi
+fi
+if [ -x /opt/discord/Discord ]; then
+    exec /opt/discord/Discord "$@"
+else
+    exec /usr/bin/discord "$@"
+fi
+"""
+    try:
+        need_write = True
+        if os.path.exists(wrapper_path):
+            with open(wrapper_path, "r") as f:
+                if "Atlantic Discord clean-launch" in f.read():
+                    need_write = False
+        if need_write:
+            if os.access("/usr/local/bin", os.W_OK):
+                with open(wrapper_path, "w") as f:
+                    f.write(wrapper_code)
+                os.chmod(wrapper_path, 0o755)
+            elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
+                p = subprocess.Popen(["sudo", "tee", wrapper_path], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                p.communicate(input=wrapper_code.encode())
+                subprocess.run(["sudo", "chmod", "+x", wrapper_path], capture_output=True)
+    except Exception:
+        pass
 
 def fix_spotify_prefs():
     home = os.path.expanduser("~")
@@ -461,6 +522,7 @@ def main():
     apply_mouse_dpi(1600)
     fix_steam_loopback()
     fix_steam_config()
+    fix_discord_wrapper()
     fix_spotify_prefs()
     # Ensure night light is neutral
     try:

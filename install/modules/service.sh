@@ -155,19 +155,25 @@ EOF' 2>/dev/null || true
     user_home=$(getent passwd "$target_user" 2>/dev/null | cut -d: -f6)
     [[ -z "$user_home" ]] && user_home="$HOME"
     if [ -n "$user_home" ]; then
-        mkdir -p "$user_home/.local/share/Steam" "$user_home/.steam/steam" "$user_home/.config/spotify"
+        mkdir -p "$user_home/.local/share/Steam" "$user_home/.steam" "$user_home/.config/spotify"
         [ ! -f "$user_home/.config/spotify/prefs" ] && echo "app.autologin.enabled=false" > "$user_home/.config/spotify/prefs"
+
+        # CRITICAL: ~/.steam/steam and ~/.steam/root MUST be symlinks, NEVER directories!
+        [ -d "$user_home/.steam/steam" ] && [ ! -L "$user_home/.steam/steam" ] && rm -rf "$user_home/.steam/steam"
+        [ -d "$user_home/.steam/root" ] && [ ! -L "$user_home/.steam/root" ] && rm -rf "$user_home/.steam/root"
+        ln -sfn "$user_home/.local/share/Steam" "$user_home/.steam/steam"
+        ln -sfn "$user_home/.local/share/Steam" "$user_home/.steam/root"
+
         cat << "EOF" > "$user_home/.local/share/Steam/steam_dev.cfg"
 @nClientDownloadEnableHTTP2PlatformLinux 0
 @fDownloadRateImprovementToAddAnotherConnection 1.0
 EOF
-        cp "$user_home/.local/share/Steam/steam_dev.cfg" "$user_home/.steam/steam/steam_dev.cfg" 2>/dev/null || true
         if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
             chown -R "$target_user:" "$user_home/.local/share/Steam" "$user_home/.steam" "$user_home/.config/spotify" 2>/dev/null || true
         fi
 
         # Pre-bootstrap Steam client during installation so desktop click opens immediately
-        if [ ! -f "$user_home/.local/share/Steam/ubuntu12_32/steam" ]; then
+        if [ ! -f "$user_home/.local/share/Steam/steam.sh" ]; then
             if command -v xvfb-run &>/dev/null && command -v steam &>/dev/null; then
                 echo -e "\n\e[36m[ STEAM ]\e[0m Steam ilk kurulum dosyalari indiriliyor ve hazirlaniyor..."
                 local run_steam_cmd="xvfb-run -a steam -silent </dev/null >/dev/null 2>&1 &"
@@ -177,11 +183,13 @@ EOF
                     bash -c "$run_steam_cmd"
                 fi
                 local count=0
-                while [ $count -lt 60 ]; do
-                    if [ -f "$user_home/.local/share/Steam/ubuntu12_32/steam" ]; then
+                while [ $count -lt 120 ]; do
+                    if [ -f "$user_home/.local/share/Steam/steam.sh" ] && [ -d "$user_home/.local/share/Steam/package" ]; then
                         echo -e "\e[32m[ ✓ ]\e[0m Steam kurulum dosyalari basariyla tamamlandi."
-                        sleep 2
-                        pkill -9 -fi steam 2>/dev/null || true
+                        sleep 3
+                        pkill -15 -f steam 2>/dev/null || true
+                        sleep 1
+                        pkill -9 -f steam 2>/dev/null || true
                         pkill -9 -fi Xvfb 2>/dev/null || true
                         break
                     fi
@@ -189,15 +197,41 @@ EOF
                     count=$((count + 1))
                     printf "\r\e[36m[ STEAM ]\e[0m Steam paketleri indiriliyor (%ds)..." "$count"
                 done
-                pkill -9 -fi steam 2>/dev/null || true
+                pkill -15 -f steam 2>/dev/null || true
+                sleep 1
+                pkill -9 -f steam 2>/dev/null || true
                 pkill -9 -fi Xvfb 2>/dev/null || true
                 echo ""
+                # If steam.sh does not exist after timeout, clear broken partial files
+                if [ ! -f "$user_home/.local/share/Steam/steam.sh" ]; then
+                    rm -rf "$user_home/.local/share/Steam/package" "$user_home/.local/share/Steam/tmp" 2>/dev/null || true
+                fi
                 if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
                     chown -R "$target_user:" "$user_home/.local/share/Steam" "$user_home/.steam" 2>/dev/null || true
                 fi
             fi
         fi
     fi
+
+    # Discord clean-launch wrapper (prevent hanging zombie processes)
+    mkdir -p /usr/local/bin 2>/dev/null || true
+    cat << "EOF" > /usr/local/bin/discord 2>/dev/null || sudo tee /usr/local/bin/discord >/dev/null 2>&1 || true
+#!/bin/bash
+# Atlantic Discord clean-launch wrapper: cleans up hanging zombie processes on start
+if command -v hyprctl &>/dev/null; then
+    if ! hyprctl clients -j 2>/dev/null | jq -e '.[] | select((.class // "") | test("(?i)discord|vesktop"))' >/dev/null; then
+        pkill -9 -x Discord 2>/dev/null || true
+        pkill -9 -fi /opt/discord/Discord 2>/dev/null || true
+        sleep 0.1
+    fi
+fi
+if [ -x /opt/discord/Discord ]; then
+    exec /opt/discord/Discord "$@"
+else
+    exec /usr/bin/discord "$@"
+fi
+EOF
+    chmod +x /usr/local/bin/discord 2>/dev/null || sudo chmod +x /usr/local/bin/discord 2>/dev/null || true
 
     # Spotify & Spicetify setup (permissions & marketplace)
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -887,27 +887,41 @@ Variants {
                     let isSteam = cleanId.toLowerCase().indexOf("steam") !== -1 || nameLower.indexOf("steam") !== -1;
                     if (isSteam && typeof Quickshell !== "undefined") {
                         let steamSetupScript = `
-if [ ! -f "$HOME/.local/share/Steam/ubuntu12_32/steam" ]; then
-    mkdir -p "$HOME/.local/share/Steam" "$HOME/.steam/steam"
+[ -d "$HOME/.steam/steam" ] && [ ! -L "$HOME/.steam/steam" ] && rm -rf "$HOME/.steam/steam"
+[ -d "$HOME/.steam/root" ] && [ ! -L "$HOME/.steam/root" ] && rm -rf "$HOME/.steam/root"
+mkdir -p "$HOME/.local/share/Steam" "$HOME/.steam"
+ln -sfn "$HOME/.local/share/Steam" "$HOME/.steam/steam"
+ln -sfn "$HOME/.local/share/Steam" "$HOME/.steam/root"
+
+if [ ! -f "$HOME/.local/share/Steam/steam_dev.cfg" ]; then
     cat << "EOF" > "$HOME/.local/share/Steam/steam_dev.cfg"
 @nClientDownloadEnableHTTP2PlatformLinux 0
 @fDownloadRateImprovementToAddAnotherConnection 1.0
 EOF
-    cp "$HOME/.local/share/Steam/steam_dev.cfg" "$HOME/.steam/steam/steam_dev.cfg" 2>/dev/null || true
-    kitty --class "steam-installer" --title "Steam Kurulumu" -e bash -c "
-        echo '=======================================================';
-        echo ' Steam ilk kurulum dosyalari indiriliyor ve yukleniyor...';
-        echo ' Lutfen bekleyin, bu pencere islem bitince kapanacaktir.';
-        echo '=======================================================';
-        echo '';
-        steam;
-    " &
-else
-    gtk-launch steam 2>/dev/null || steam &
 fi
+
+if [ ! -f "$HOME/.local/share/Steam/steam.sh" ]; then
+    rm -rf "$HOME/.local/share/Steam/package" "$HOME/.local/share/Steam/tmp" 2>/dev/null || true
+fi
+
+gtk-launch steam 2>/dev/null || steam &
 `;
                         Quickshell.execDetached(["bash", "-c", steamSetupScript]);
                         return;
+                    }
+
+                    let isDiscord = cleanId.toLowerCase().indexOf("discord") !== -1 || nameLower.indexOf("discord") !== -1 ||
+                                    cleanId.toLowerCase().indexOf("vesktop") !== -1 || nameLower.indexOf("vesktop") !== -1;
+                    if (isDiscord && typeof Quickshell !== "undefined") {
+                        let discordHook = `
+if ! hyprctl clients -j 2>/dev/null | jq -e '.[] | select((.class // "") | test("(?i)discord|vesktop"))' >/dev/null; then
+    pkill -9 -x Discord 2>/dev/null || true
+    pkill -9 -fi /opt/discord/Discord 2>/dev/null || true
+    pkill -9 -fi vesktop 2>/dev/null || true
+    sleep 0.15
+fi &
+`;
+                        Quickshell.execDetached(["bash", "-c", discordHook]);
                     }
 
                     let isSpotify = cleanId.toLowerCase().indexOf("spotify") !== -1 || nameLower.indexOf("spotify") !== -1;

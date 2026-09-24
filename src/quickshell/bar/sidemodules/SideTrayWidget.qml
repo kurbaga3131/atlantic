@@ -178,6 +178,18 @@ Rectangle {
                     if (TrayMenuController.activeItemId === idStr) {
                         TrayMenuController.hide();
                     }
+
+                    let isDc = false;
+                    let mId = String(modelData ? (modelData.id || "") : "").toLowerCase();
+                    let mTitle = String(modelData ? (modelData.title || "") : "").toLowerCase();
+                    let mIcon = String(modelData ? (modelData.icon || modelData.iconName || "") : "").toLowerCase();
+                    if (mId.includes("discord") || mTitle.includes("discord") || mIcon.includes("discord") ||
+                        mId.includes("vesktop") || mTitle.includes("vesktop") || mIcon.includes("vesktop")) {
+                        isDc = true;
+                    }
+                    if (isDc && typeof Quickshell !== "undefined") {
+                        Quickshell.execDetached(["bash", "-c", "sleep 0.4; pkill -9 -x Discord 2>/dev/null; pkill -9 -fi /opt/discord/Discord 2>/dev/null; pkill -9 -fi vesktop 2>/dev/null &"]);
+                    }
                 }
 
                 Timer {
