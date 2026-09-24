@@ -489,26 +489,13 @@ def fix_steam_config():
             with open(fpath, "w") as f:
                 f.write(cfg_content)
 
-        # Remove stale lockfiles that prevent Steam from opening
+        # Remove stale lockfiles that prevent Steam from opening (only if steam is not running)
         for lck in [".steam_is_running.lock", "steam.pid", "steam.pipe"]:
             for sdir in [steam_data, steam_link_dir]:
                 f = os.path.join(sdir, lck)
                 if os.path.exists(f):
                     try:
                         os.remove(f)
-                    except Exception:
-                        pass
-
-        # If previous installation was killed prematurely and corrupted:
-        # If steam-runtime does NOT exist, clean up partial packages so Steam bootstraps cleanly
-        if not os.path.exists(os.path.join(steam_data, "ubuntu12_32", "steam-runtime")):
-            for bad_d in ["package", "tmp", "bootstrap.tar.xz"]:
-                p = os.path.join(steam_data, bad_d)
-                if os.path.isdir(p):
-                    shutil.rmtree(p, ignore_errors=True)
-                elif os.path.isfile(p):
-                    try:
-                        os.remove(p)
                     except Exception:
                         pass
     except Exception:

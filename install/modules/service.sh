@@ -174,11 +174,8 @@ EOF' 2>/dev/null || true
 @nClientDownloadEnableHTTP2PlatformLinux 0
 @fDownloadRateImprovementToAddAnotherConnection 1.0
 EOF
-        # Clean up any stale Steam lockfiles and partial bootstrap files
+        # Clean up any stale Steam lockfiles
         rm -f "$user_home/.local/share/Steam/.steam_is_running.lock" "$user_home/.steam/steam.pid" "$user_home/.steam/steam.pipe" 2>/dev/null || true
-        if [ ! -d "$user_home/.local/share/Steam/ubuntu12_32/steam-runtime" ]; then
-            rm -rf "$user_home/.local/share/Steam/package" "$user_home/.local/share/Steam/tmp" "$user_home/.local/share/Steam/bootstrap.tar.xz" 2>/dev/null || true
-        fi
 
         if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
             chown -R "$target_user:" "$user_home/.local/share/Steam" "$user_home/.steam" "$user_home/.config/spotify" 2>/dev/null || true

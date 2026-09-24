@@ -970,28 +970,8 @@ PanelWindow {
 
         let isSteam = cleanId.indexOf("steam") !== -1 || nameLower.indexOf("steam") !== -1;
         if (isSteam && typeof Quickshell !== "undefined") {
-            let steamSetupScript = `
-[ -d "$HOME/.steam/steam" ] && [ ! -L "$HOME/.steam/steam" ] && rm -rf "$HOME/.steam/steam"
-[ -d "$HOME/.steam/root" ] && [ ! -L "$HOME/.steam/root" ] && rm -rf "$HOME/.steam/root"
-mkdir -p "$HOME/.local/share/Steam" "$HOME/.steam"
-ln -sfn "$HOME/.local/share/Steam" "$HOME/.steam/steam"
-ln -sfn "$HOME/.local/share/Steam" "$HOME/.steam/root"
-
-if [ ! -f "$HOME/.local/share/Steam/steam_dev.cfg" ]; then
-    cat << "EOF" > "$HOME/.local/share/Steam/steam_dev.cfg"
-@nClientDownloadEnableHTTP2PlatformLinux 0
-@fDownloadRateImprovementToAddAnotherConnection 1.0
-EOF
-fi
-
-rm -f "$HOME/.local/share/Steam/.steam_is_running.lock" "$HOME/.steam/steam.pid" "$HOME/.steam/steam.pipe" 2>/dev/null || true
-if [ ! -d "$HOME/.local/share/Steam/ubuntu12_32/steam-runtime" ]; then
-    rm -rf "$HOME/.local/share/Steam/package" "$HOME/.local/share/Steam/tmp" "$HOME/.local/share/Steam/bootstrap.tar.xz" 2>/dev/null || true
-fi
-
-steam </dev/null >/dev/null 2>&1 &
-`;
-            Quickshell.execDetached(["bash", "-c", steamSetupScript]);
+            let steamLauncher = (typeof Caching !== "undefined" && Caching.atlanticDir) ? (Caching.atlanticDir + "/scripts/launch_steam.sh") : "$HOME/.local/share/atlantic/src/scripts/launch_steam.sh";
+            Quickshell.execDetached(["bash", "-c", "if [ -f \"" + steamLauncher + "\" ]; then bash \"" + steamLauncher + "\"; else gtk-launch steam 2>/dev/null || steam & fi"]);
             if (Caching.qsDir) {
                 Quickshell.execDetached(["python3", Caching.qsDir + "/launcher/app_rank.py", "--log-launch", "--name", appName]);
             }
