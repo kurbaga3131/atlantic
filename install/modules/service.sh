@@ -149,6 +149,24 @@ EOF' 2>/dev/null || true
         fi
     fi
 
+    # Optimize Steam client download speed (disable HTTP/2 throttling on Linux)
+    local target_user="${SUDO_USER:-$USER}"
+    local user_home
+    user_home=$(getent passwd "$target_user" 2>/dev/null | cut -d: -f6)
+    [[ -z "$user_home" ]] && user_home="$HOME"
+    if [ -n "$user_home" ]; then
+        mkdir -p "$user_home/.local/share/Steam" "$user_home/.steam/steam" "$user_home/.config/spotify"
+        [ ! -f "$user_home/.config/spotify/prefs" ] && echo "app.autologin.enabled=false" > "$user_home/.config/spotify/prefs"
+        cat << "EOF" > "$user_home/.local/share/Steam/steam_dev.cfg"
+@nClientDownloadEnableHTTP2PlatformLinux 0
+@fDownloadRateImprovementToAddAnotherConnection 1.0
+EOF
+        cp "$user_home/.local/share/Steam/steam_dev.cfg" "$user_home/.steam/steam/steam_dev.cfg" 2>/dev/null || true
+        if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
+            chown -R "$target_user:" "$user_home/.local/share/Steam" "$user_home/.steam" "$user_home/.config/spotify" 2>/dev/null || true
+        fi
+    fi
+
     # Spotify & Spicetify setup (permissions & marketplace)
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     local spicetify_script="$script_dir/../../src/scripts/setup_spicetify.sh"

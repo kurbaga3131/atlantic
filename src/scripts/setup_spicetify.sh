@@ -38,6 +38,12 @@ run_as_user '
 
     mkdir -p "$CUSTOM_APPS_DIR" "$SPICETIFY_DIR/Themes" "$SPICETIFY_DIR/Extensions"
 
+    # Ensure Spotify configuration directory and prefs exist for first install
+    mkdir -p "$HOME/.config/spotify"
+    if [ ! -f "$HOME/.config/spotify/prefs" ]; then
+        echo "app.autologin.enabled=false" > "$HOME/.config/spotify/prefs"
+    fi
+
     # Configure paths
     spicetify config spotify_path "/opt/spotify" >/dev/null 2>&1 || true
     spicetify config prefs_path "$HOME/.config/spotify/prefs" >/dev/null 2>&1 || true

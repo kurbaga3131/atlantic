@@ -429,12 +429,39 @@ def fix_steam_loopback():
     except Exception:
         pass
 
+def fix_steam_config():
+    home = os.path.expanduser("~")
+    cfg_content = "@nClientDownloadEnableHTTP2PlatformLinux 0\n@fDownloadRateImprovementToAddAnotherConnection 1.0\n"
+    for d in [os.path.join(home, ".local/share/Steam"), os.path.join(home, ".steam/steam")]:
+        try:
+            os.makedirs(d, exist_ok=True)
+            fpath = os.path.join(d, "steam_dev.cfg")
+            if not os.path.exists(fpath):
+                with open(fpath, "w") as f:
+                    f.write(cfg_content)
+        except Exception:
+            pass
+
+def fix_spotify_prefs():
+    home = os.path.expanduser("~")
+    spot_dir = os.path.join(home, ".config/spotify")
+    try:
+        os.makedirs(spot_dir, exist_ok=True)
+        prefs_file = os.path.join(spot_dir, "prefs")
+        if not os.path.exists(prefs_file):
+            with open(prefs_file, "w") as f:
+                f.write("app.autologin.enabled=false\n")
+    except Exception:
+        pass
+
 def main():
     mons = detect_monitors()
     if mons:
         apply_monitors(mons)
     apply_mouse_dpi(1600)
     fix_steam_loopback()
+    fix_steam_config()
+    fix_spotify_prefs()
     # Ensure night light is neutral
     try:
         subprocess.run(["busctl", "--user", "set-property", "rs.wl-gammarelay", "/", "rs.wl.gammarelay", "Temperature", "q", "6500"], capture_output=True, timeout=2)

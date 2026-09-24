@@ -18,3 +18,9 @@ window-rule {
     open-floating true
 }
 
+window-rule {
+    match app-id="steam-installer"
+    open-floating true
+}
+
+

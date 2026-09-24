@@ -7,4 +7,7 @@ hide_edge_borders none
 
 for_window [class="(?i)steam" title="(?i)updating"] floating enable
 for_window [class="(?i)zenity"] floating enable
+for_window [app_id="steam-installer"] floating enable
+for_window [class="steam-installer"] floating enable
+
 

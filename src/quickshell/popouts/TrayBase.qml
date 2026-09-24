@@ -113,11 +113,6 @@ PanelWindow {
         TrayMenuController.hide();
     }
 
-    Process {
-        id: appCleanupProc
-        running: false
-    }
-
     function triggerMenuItem(modelData) {
         if (!modelData) return;
         let text = (modelData.text || "").toLowerCase();
@@ -125,13 +120,15 @@ PanelWindow {
 
         let isDiscord = false;
         if (trayMenuWindow.activeItem) {
-            let aid = (trayMenuWindow.activeItem.id || "").toLowerCase();
-            let atitle = (trayMenuWindow.activeItem.title || "").toLowerCase();
-            if (aid.indexOf("discord") !== -1 || atitle.indexOf("discord") !== -1) {
+            let aid = String(trayMenuWindow.activeItem.id || "").toLowerCase();
+            let atitle = String(trayMenuWindow.activeItem.title || "").toLowerCase();
+            let aicon = String(trayMenuWindow.activeItem.icon || trayMenuWindow.activeItem.iconName || "").toLowerCase();
+            if (aid.indexOf("discord") !== -1 || atitle.indexOf("discord") !== -1 || aicon.indexOf("discord") !== -1 ||
+                aid.indexOf("vesktop") !== -1 || atitle.indexOf("vesktop") !== -1 || aicon.indexOf("vesktop") !== -1) {
                 isDiscord = true;
             }
         }
-        if (text.indexOf("discord") !== -1) {
+        if (text.indexOf("discord") !== -1 || text.indexOf("vesktop") !== -1) {
             isDiscord = true;
         }
 
@@ -139,12 +136,11 @@ PanelWindow {
         trayMenuWindow.closeMenu();
 
         if (isDiscord && isQuit) {
-            appCleanupProc.command = [
+            Quickshell.execDetached([
                 "bash",
                 "-c",
-                "(sleep 0.8; pkill -TERM -f '([dD]iscord|[vV]esktop|[wW]ebcord)' 2>/dev/null; sleep 0.5; pkill -KILL -f '([dD]iscord|[vV]esktop|[wW]ebcord)' 2>/dev/null) &"
-            ];
-            appCleanupProc.running = true;
+                "sleep 0.5; pkill -9 -fi discord 2>/dev/null; pkill -9 -fi vesktop 2>/dev/null; pkill -9 -fi webcord 2>/dev/null &"
+            ]);
         }
     }
 

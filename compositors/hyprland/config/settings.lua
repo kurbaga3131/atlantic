@@ -77,3 +77,12 @@ hl.window_rule({
   center = true,
 })
 
+hl.window_rule({
+  match = {
+    class = "steam-installer",
+  },
+  float = true,
+  center = true,
+})
+
+

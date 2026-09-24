@@ -886,8 +886,42 @@ Variants {
 
                     let isSteam = cleanId.toLowerCase().indexOf("steam") !== -1 || nameLower.indexOf("steam") !== -1;
                     if (isSteam && typeof Quickshell !== "undefined") {
-                        let notifyCmd = "if [ ! -f \"$HOME/.local/share/Steam/steam.sh\" ]; then notify-send -a \"Steam\" -i \"steam\" \"Steam Başlatılıyor\" \"Steam ilk kurulum dosyaları hazırlanıyor, lütfen bekleyin...\" 2>/dev/null; fi &";
-                        Quickshell.execDetached(["bash", "-c", notifyCmd]);
+                        let steamSetupScript = `
+if [ ! -f "$HOME/.local/share/Steam/ubuntu12_32/steam" ]; then
+    mkdir -p "$HOME/.local/share/Steam" "$HOME/.steam/steam"
+    cat << "EOF" > "$HOME/.local/share/Steam/steam_dev.cfg"
+@nClientDownloadEnableHTTP2PlatformLinux 0
+@fDownloadRateImprovementToAddAnotherConnection 1.0
+EOF
+    cp "$HOME/.local/share/Steam/steam_dev.cfg" "$HOME/.steam/steam/steam_dev.cfg" 2>/dev/null || true
+    kitty --class "steam-installer" --title "Steam Kurulumu" -e bash -c "
+        echo '=======================================================';
+        echo ' Steam ilk kurulum dosyalari indiriliyor ve yukleniyor...';
+        echo ' Lutfen bekleyin, bu pencere islem bitince kapanacaktir.';
+        echo '=======================================================';
+        echo '';
+        steam;
+    " &
+else
+    gtk-launch steam 2>/dev/null || steam &
+fi
+`;
+                        Quickshell.execDetached(["bash", "-c", steamSetupScript]);
+                        return;
+                    }
+
+                    let isSpotify = cleanId.toLowerCase().indexOf("spotify") !== -1 || nameLower.indexOf("spotify") !== -1;
+                    if (isSpotify && typeof Quickshell !== "undefined") {
+                        let spotifyHook = `
+if command -v spicetify &>/dev/null; then
+    mkdir -p "$HOME/.config/spotify"
+    [ ! -f "$HOME/.config/spotify/prefs" ] && echo "app.autologin.enabled=false" > "$HOME/.config/spotify/prefs"
+    if [ ! -d "$HOME/.config/spicetify/Backup" ]; then
+        (spicetify config spotify_path "/opt/spotify" prefs_path "$HOME/.config/spotify/prefs" custom_apps marketplace && (spicetify backup apply || spicetify apply)) >/dev/null 2>&1 &
+    fi
+fi &
+`;
+                        Quickshell.execDetached(["bash", "-c", spotifyHook]);
                     }
 
                     if (typeof DesktopEntries !== "undefined") {
