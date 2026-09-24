@@ -900,28 +900,15 @@ if [ ! -f "$HOME/.local/share/Steam/steam_dev.cfg" ]; then
 EOF
 fi
 
-if [ ! -f "$HOME/.local/share/Steam/steam.sh" ]; then
-    rm -rf "$HOME/.local/share/Steam/package" "$HOME/.local/share/Steam/tmp" 2>/dev/null || true
+rm -f "$HOME/.local/share/Steam/.steam_is_running.lock" "$HOME/.steam/steam.pid" "$HOME/.steam/steam.pipe" 2>/dev/null || true
+if [ ! -d "$HOME/.local/share/Steam/ubuntu12_32/steam-runtime" ]; then
+    rm -rf "$HOME/.local/share/Steam/package" "$HOME/.local/share/Steam/tmp" "$HOME/.local/share/Steam/bootstrap.tar.xz" 2>/dev/null || true
 fi
 
 gtk-launch steam 2>/dev/null || steam &
 `;
                         Quickshell.execDetached(["bash", "-c", steamSetupScript]);
                         return;
-                    }
-
-                    let isDiscord = cleanId.toLowerCase().indexOf("discord") !== -1 || nameLower.indexOf("discord") !== -1 ||
-                                    cleanId.toLowerCase().indexOf("vesktop") !== -1 || nameLower.indexOf("vesktop") !== -1;
-                    if (isDiscord && typeof Quickshell !== "undefined") {
-                        let discordHook = `
-if ! hyprctl clients -j 2>/dev/null | jq -e '.[] | select((.class // "") | test("(?i)discord|vesktop"))' >/dev/null; then
-    pkill -9 -x Discord 2>/dev/null || true
-    pkill -9 -fi /opt/discord/Discord 2>/dev/null || true
-    pkill -9 -fi vesktop 2>/dev/null || true
-    sleep 0.15
-fi &
-`;
-                        Quickshell.execDetached(["bash", "-c", discordHook]);
                     }
 
                     let isSpotify = cleanId.toLowerCase().indexOf("spotify") !== -1 || nameLower.indexOf("spotify") !== -1;

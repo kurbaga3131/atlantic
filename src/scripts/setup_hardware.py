@@ -459,59 +459,53 @@ def fix_steam_config():
             with open(fpath, "w") as f:
                 f.write(cfg_content)
 
+        # Remove stale lockfiles that prevent Steam from opening
+        for lck in [".steam_is_running.lock", "steam.pid", "steam.pipe"]:
+            for sdir in [steam_data, steam_link_dir]:
+                f = os.path.join(sdir, lck)
+                if os.path.exists(f):
+                    try:
+                        os.remove(f)
+                    except Exception:
+                        pass
+
         # If previous installation was killed prematurely and corrupted:
-        # If steam.sh does NOT exist, clean up partial packages
-        steam_sh = os.path.join(steam_data, "steam.sh")
-        if not os.path.exists(steam_sh):
-            for bad_d in ["package", "tmp"]:
-                shutil.rmtree(os.path.join(steam_data, bad_d), ignore_errors=True)
+        # If steam-runtime does NOT exist, clean up partial packages so Steam bootstraps cleanly
+        if not os.path.exists(os.path.join(steam_data, "ubuntu12_32", "steam-runtime")):
+            for bad_d in ["package", "tmp", "bootstrap.tar.xz"]:
+                p = os.path.join(steam_data, bad_d)
+                if os.path.isdir(p):
+                    shutil.rmtree(p, ignore_errors=True)
+                elif os.path.isfile(p):
+                    try:
+                        os.remove(p)
+                    except Exception:
+                        pass
     except Exception:
         pass
 
-def fix_discord_wrapper():
+def clean_discord_environment():
     home = os.path.expanduser("~")
-    user_bin = os.path.join(home, ".local/bin")
-    user_wrapper = os.path.join(user_bin, "discord")
-    sys_wrapper = "/usr/local/bin/discord"
-    wrapper_code = """#!/bin/bash
-# Atlantic Discord clean-launch wrapper: cleans up hanging zombie processes on start
-if command -v hyprctl &>/dev/null; then
-    if ! hyprctl clients -j 2>/dev/null | jq -e '.[] | select((.class // "") | test("(?i)discord|vesktop"))' >/dev/null; then
-        pkill -9 -x Discord 2>/dev/null || true
-        pkill -9 -fi /opt/discord/Discord 2>/dev/null || true
-        sleep 0.1
-    fi
-fi
-if [ -x /opt/discord/Discord ]; then
-    exec /opt/discord/Discord "$@"
-else
-    exec /usr/bin/discord "$@"
-fi
-"""
-    try:
-        # 1. User ~/.local/bin/discord (always writeable without root)
-        os.makedirs(user_bin, exist_ok=True)
-        with open(user_wrapper, "w") as f:
-            f.write(wrapper_code)
-        os.chmod(user_wrapper, 0o755)
+    # 1. Remove any faulty wrapper files that blocked Discord from opening normally
+    for w in [os.path.join(home, ".local/bin/discord"), "/usr/local/bin/discord"]:
+        if os.path.exists(w):
+            try:
+                os.remove(w)
+            except Exception:
+                try:
+                    if subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
+                        subprocess.run(["sudo", "rm", "-f", w], capture_output=True)
+                except Exception:
+                    pass
 
-        # 2. System /usr/local/bin/discord
-        need_write = True
-        if os.path.exists(sys_wrapper):
-            with open(sys_wrapper, "r") as f:
-                if "Atlantic Discord clean-launch" in f.read():
-                    need_write = False
-        if need_write:
-            if os.access("/usr/local/bin", os.W_OK):
-                with open(sys_wrapper, "w") as f:
-                    f.write(wrapper_code)
-                os.chmod(sys_wrapper, 0o755)
-            elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
-                p = subprocess.Popen(["sudo", "tee", sys_wrapper], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                p.communicate(input=wrapper_code.encode())
-                subprocess.run(["sudo", "chmod", "+x", sys_wrapper], capture_output=True)
-    except Exception:
-        pass
+    # 2. Remove stale Electron singleton locks that cause Discord to hang / not open
+    for lck in ["SingletonLock", "SingletonSocket", "SingletonCookie"]:
+        f = os.path.join(home, ".config/discord", lck)
+        if os.path.exists(f):
+            try:
+                os.remove(f)
+            except Exception:
+                pass
 
 def fix_spotify_prefs():
     home = os.path.expanduser("~")
@@ -532,7 +526,7 @@ def main():
     apply_mouse_dpi(1600)
     fix_steam_loopback()
     fix_steam_config()
-    fix_discord_wrapper()
+    clean_discord_environment()
     fix_spotify_prefs()
     # Ensure night light is neutral
     try:
