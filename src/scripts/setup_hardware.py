@@ -412,11 +412,29 @@ mouse:*:*
     except Exception:
         pass
 
+def fix_steam_loopback():
+    hosts_file = "/etc/hosts"
+    try:
+        if os.path.exists(hosts_file):
+            with open(hosts_file, "r") as f:
+                content = f.read()
+            if "steamloopback.host" not in content:
+                addition = "\n127.0.0.1 steamloopback.host\n::1 steamloopback.host\n"
+                if os.geteuid() == 0:
+                    with open(hosts_file, "a") as f:
+                        f.write(addition)
+                elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
+                    p = subprocess.Popen(["sudo", "tee", "-a", hosts_file], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    p.communicate(input=addition.encode())
+    except Exception:
+        pass
+
 def main():
     mons = detect_monitors()
     if mons:
         apply_monitors(mons)
     apply_mouse_dpi(1600)
+    fix_steam_loopback()
     # Ensure night light is neutral
     try:
         subprocess.run(["busctl", "--user", "set-property", "rs.wl-gammarelay", "/", "rs.wl.gammarelay", "Temperature", "q", "6500"], capture_output=True, timeout=2)

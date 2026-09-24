@@ -142,6 +142,13 @@ EOF' 2>/dev/null || true
         fi
     fi
 
+    # Fix Steam loopback DNS hang with systemd-resolved
+    if [ -f /etc/hosts ]; then
+        if ! grep -q "steamloopback.host" /etc/hosts; then
+            echo -e "\n127.0.0.1 steamloopback.host\n::1 steamloopback.host" | sudo tee -a /etc/hosts >/dev/null 2>&1 || true
+        fi
+    fi
+
     # Spotify & Spicetify setup (permissions & marketplace)
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     local spicetify_script="$script_dir/../../src/scripts/setup_spicetify.sh"

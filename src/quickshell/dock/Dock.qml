@@ -884,6 +884,12 @@ Variants {
                     let cleanId = (desktopId || "").replace(/\.desktop$/i, "");
                     let nameLower = (appName || "").toLowerCase();
 
+                    let isSteam = cleanId.toLowerCase().indexOf("steam") !== -1 || nameLower.indexOf("steam") !== -1;
+                    if (isSteam && typeof Quickshell !== "undefined") {
+                        let notifyCmd = "if [ ! -f \"$HOME/.local/share/Steam/steam.sh\" ]; then notify-send -a \"Steam\" -i \"steam\" \"Steam Başlatılıyor\" \"Steam ilk kurulum dosyaları hazırlanıyor, lütfen bekleyin...\" 2>/dev/null; fi &";
+                        Quickshell.execDetached(["bash", "-c", notifyCmd]);
+                    }
+
                     if (typeof DesktopEntries !== "undefined") {
                         let entry = null;
                         if (desktopId) entry = DesktopEntries.byId(desktopId);

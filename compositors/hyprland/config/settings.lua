@@ -58,3 +58,22 @@ hl.animation({ leaf = "fade", enabled = true, speed = 5, bezier = "myBezier" })
 hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "myBezier", style = "slide" })
 hl.animation({ leaf = "specialWorkspaceIn", enabled = true, speed = 5, bezier = "myBezier", style = "fade" })
 hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 5, bezier = "myBezier", style = "fade" })
+
+-- Window rules for Steam updater & dialogs
+hl.window_rule({
+  match = {
+    class = "(?i)steam",
+    title = "(?i)updating steam.*",
+  },
+  float = true,
+  center = true,
+})
+
+hl.window_rule({
+  match = {
+    class = "(?i)zenity",
+  },
+  float = true,
+  center = true,
+})
+

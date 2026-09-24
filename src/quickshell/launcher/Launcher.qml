@@ -965,6 +965,14 @@ PanelWindow {
     }
 
     function launchApp(appName, desktopId) {
+        let cleanId = (desktopId || "").replace(/\.desktop$/i, "").toLowerCase();
+        let nameLower = (appName || "").toLowerCase();
+        let isSteam = cleanId.indexOf("steam") !== -1 || nameLower.indexOf("steam") !== -1;
+        if (isSteam && typeof Quickshell !== "undefined") {
+            let notifyCmd = "if [ ! -f \"$HOME/.local/share/Steam/steam.sh\" ]; then notify-send -a \"Steam\" -i \"steam\" \"Steam Başlatılıyor\" \"Steam ilk kurulum dosyaları hazırlanıyor, lütfen bekleyin...\" 2>/dev/null; fi &";
+            Quickshell.execDetached(["bash", "-c", notifyCmd]);
+        }
+
         let entry = DesktopEntries.byId(desktopId);
         if (entry) {
             entry.execute();

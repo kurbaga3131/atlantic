@@ -113,6 +113,41 @@ PanelWindow {
         TrayMenuController.hide();
     }
 
+    Process {
+        id: appCleanupProc
+        running: false
+    }
+
+    function triggerMenuItem(modelData) {
+        if (!modelData) return;
+        let text = (modelData.text || "").toLowerCase();
+        let isQuit = text.indexOf("quit") !== -1 || text.indexOf("exit") !== -1 || text.indexOf("çıkış") !== -1 || text.indexOf("kapat") !== -1;
+
+        let isDiscord = false;
+        if (trayMenuWindow.activeItem) {
+            let aid = (trayMenuWindow.activeItem.id || "").toLowerCase();
+            let atitle = (trayMenuWindow.activeItem.title || "").toLowerCase();
+            if (aid.indexOf("discord") !== -1 || atitle.indexOf("discord") !== -1) {
+                isDiscord = true;
+            }
+        }
+        if (text.indexOf("discord") !== -1) {
+            isDiscord = true;
+        }
+
+        modelData.triggered();
+        trayMenuWindow.closeMenu();
+
+        if (isDiscord && isQuit) {
+            appCleanupProc.command = [
+                "bash",
+                "-c",
+                "(sleep 0.8; pkill -TERM -f '([dD]iscord|[vV]esktop|[wW]ebcord)' 2>/dev/null; sleep 0.5; pkill -KILL -f '([dD]iscord|[vV]esktop|[wW]ebcord)' 2>/dev/null) &"
+            ];
+            appCleanupProc.running = true;
+        }
+    }
+
     property var activeItem: {
         if (!activeItemId && activeItemId !== 0) return null;
         let list = SystemTray.items;
@@ -704,8 +739,7 @@ PanelWindow {
                                 }
                                 onClicked: {
                                     if (modelData && !modelData.hasChildren) {
-                                        modelData.triggered();
-                                        trayMenuWindow.closeMenu();
+                                        trayMenuWindow.triggerMenuItem(modelData);
                                     } else if (modelData && modelData.hasChildren) {
                                         let pos = rootItemDelegate.mapToItem(rootContainer, 0, 0);
                                         trayMenuWindow.openSubmenu(0, modelData, menuContainer.x, pos.y, menuContainer.width, rootItemDelegate.height);
@@ -1054,8 +1088,7 @@ PanelWindow {
                                     }
                                     onClicked: {
                                         if (modelData && !modelData.hasChildren) {
-                                            modelData.triggered();
-                                            trayMenuWindow.closeMenu();
+                                            trayMenuWindow.triggerMenuItem(modelData);
                                         } else if (modelData && modelData.hasChildren) {
                                             let pos = subItemDelegate.mapToItem(rootContainer, 0, 0);
                                             trayMenuWindow.openSubmenu(submenuPopout.stackIndex + 1, modelData, submenuPopout.x, pos.y, submenuPopout.width, subItemDelegate.height);

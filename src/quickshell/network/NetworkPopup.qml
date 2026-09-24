@@ -2150,7 +2150,7 @@ Item {
                                         font.family: ThemeBackend.fontFamily
                                         font.pixelSize: window.s(40) - (window.s(12) * coreContainer.multiShift)
                                         color: isMyDisconnecting ? ThemeBackend.overlay1 : ThemeBackend.crust
-                                        text: isMyDisconnecting ? "" : (coreMa.containsMouse ? (window.activeMode === "wifi" ? "󰖪" : (window.activeMode === "eth" ? "󰈂" : "󰂲")) : (coreContainer.myDevice ? (coreContainer.myDevice.icon || (window.activeMode === "wifi" ? "󰤨" : (window.activeMode === "eth" ? "󰈀" : "󰂯"))) : ""))
+                                        text: isMyDisconnecting ? "" : (coreMa.containsMouse ? (window.activeMode === "wifi" ? "󰖪" : (window.activeMode === "eth" ? "󰈂" : (window.activeMode === "vpn" ? "󱚵" : "󰂲"))) : (coreContainer.myDevice ? (coreContainer.myDevice.icon || (window.activeMode === "wifi" ? "󰤨" : (window.activeMode === "eth" ? "󰈀" : (window.activeMode === "vpn" ? "󰒄" : "󰂯")))) : ""))
                                         Behavior on color { enabled: window.visible; ColorAnimation { duration: 200 } }
                                     }
                                     LoadingDots { Layout.alignment: Qt.AlignHCenter; visible: isMyDisconnecting; dotCol: ThemeBackend.overlay1 }
@@ -2198,7 +2198,7 @@ Item {
                                             font.family: ThemeBackend.fontFamily
                                             font.pixelSize: window.s(40) - (window.s(12) * coreContainer.multiShift)
                                             color: ThemeBackend.text
-                                            text: isMyDisconnecting ? "" : (coreMa.containsMouse ? (window.activeMode === "wifi" ? "󰖪" : (window.activeMode === "eth" ? "󰈂" : "󰂲")) : (coreContainer.myDevice ? (coreContainer.myDevice.icon || (window.activeMode === "wifi" ? "󰤨" : (window.activeMode === "eth" ? "󰈀" : "󰂯"))) : ""))
+                                            text: isMyDisconnecting ? "" : (coreMa.containsMouse ? (window.activeMode === "wifi" ? "󰖪" : (window.activeMode === "eth" ? "󰈂" : (window.activeMode === "vpn" ? "󱚵" : "󰂲"))) : (coreContainer.myDevice ? (coreContainer.myDevice.icon || (window.activeMode === "wifi" ? "󰤨" : (window.activeMode === "eth" ? "󰈀" : (window.activeMode === "vpn" ? "󰒄" : "󰂯")))) : ""))
                                         }
                                         LoadingDots { Layout.alignment: Qt.AlignHCenter; visible: isMyDisconnecting; dotCol: ThemeBackend.text }
                                         Text {

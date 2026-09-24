@@ -7,3 +7,14 @@ layout {
         off
     }
 }
+
+window-rule {
+    match app-id=r#"(?i)steam"# title=r#"(?i)updating"#
+    open-floating true
+}
+
+window-rule {
+    match app-id=r#"(?i)zenity"#
+    open-floating true
+}
+

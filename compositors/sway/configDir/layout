@@ -4,3 +4,7 @@ default_border none
 default_floating_border none
 smart_borders off
 hide_edge_borders none
+
+for_window [class="(?i)steam" title="(?i)updating"] floating enable
+for_window [class="(?i)zenity"] floating enable
+
