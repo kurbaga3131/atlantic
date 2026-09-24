@@ -469,7 +469,10 @@ def fix_steam_config():
         pass
 
 def fix_discord_wrapper():
-    wrapper_path = "/usr/local/bin/discord"
+    home = os.path.expanduser("~")
+    user_bin = os.path.join(home, ".local/bin")
+    user_wrapper = os.path.join(user_bin, "discord")
+    sys_wrapper = "/usr/local/bin/discord"
     wrapper_code = """#!/bin/bash
 # Atlantic Discord clean-launch wrapper: cleans up hanging zombie processes on start
 if command -v hyprctl &>/dev/null; then
@@ -486,20 +489,27 @@ else
 fi
 """
     try:
+        # 1. User ~/.local/bin/discord (always writeable without root)
+        os.makedirs(user_bin, exist_ok=True)
+        with open(user_wrapper, "w") as f:
+            f.write(wrapper_code)
+        os.chmod(user_wrapper, 0o755)
+
+        # 2. System /usr/local/bin/discord
         need_write = True
-        if os.path.exists(wrapper_path):
-            with open(wrapper_path, "r") as f:
+        if os.path.exists(sys_wrapper):
+            with open(sys_wrapper, "r") as f:
                 if "Atlantic Discord clean-launch" in f.read():
                     need_write = False
         if need_write:
             if os.access("/usr/local/bin", os.W_OK):
-                with open(wrapper_path, "w") as f:
+                with open(sys_wrapper, "w") as f:
                     f.write(wrapper_code)
-                os.chmod(wrapper_path, 0o755)
+                os.chmod(sys_wrapper, 0o755)
             elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
-                p = subprocess.Popen(["sudo", "tee", wrapper_path], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                p = subprocess.Popen(["sudo", "tee", sys_wrapper], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 p.communicate(input=wrapper_code.encode())
-                subprocess.run(["sudo", "chmod", "+x", wrapper_path], capture_output=True)
+                subprocess.run(["sudo", "chmod", "+x", sys_wrapper], capture_output=True)
     except Exception:
         pass
 

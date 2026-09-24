@@ -214,12 +214,10 @@ EOF
     fi
 
     # Discord clean-launch wrapper (prevent hanging zombie processes)
-    mkdir -p /usr/local/bin 2>/dev/null || true
-    cat << "EOF" > /usr/local/bin/discord 2>/dev/null || sudo tee /usr/local/bin/discord >/dev/null 2>&1 || true
-#!/bin/bash
+    local dc_wrapper='#!/bin/bash
 # Atlantic Discord clean-launch wrapper: cleans up hanging zombie processes on start
 if command -v hyprctl &>/dev/null; then
-    if ! hyprctl clients -j 2>/dev/null | jq -e '.[] | select((.class // "") | test("(?i)discord|vesktop"))' >/dev/null; then
+    if ! hyprctl clients -j 2>/dev/null | jq -e ".[] | select((.class // \"\") | test(\"(?i)discord|vesktop\"))" >/dev/null; then
         pkill -9 -x Discord 2>/dev/null || true
         pkill -9 -fi /opt/discord/Discord 2>/dev/null || true
         sleep 0.1
@@ -229,9 +227,19 @@ if [ -x /opt/discord/Discord ]; then
     exec /opt/discord/Discord "$@"
 else
     exec /usr/bin/discord "$@"
-fi
-EOF
-    chmod +x /usr/local/bin/discord 2>/dev/null || sudo chmod +x /usr/local/bin/discord 2>/dev/null || true
+fi'
+
+    # 1. User local bin (~/.local/bin/discord) - guaranteed user write permissions
+    mkdir -p "$user_home/.local/bin" 2>/dev/null || true
+    echo "$dc_wrapper" > "$user_home/.local/bin/discord" 2>/dev/null || true
+    chmod +x "$user_home/.local/bin/discord" 2>/dev/null || true
+    if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
+        chown -R "$target_user:" "$user_home/.local/bin" 2>/dev/null || true
+    fi
+
+    # 2. System bin (/usr/local/bin/discord) via sudo tee pipe (no shell redirection error)
+    echo "$dc_wrapper" | sudo tee /usr/local/bin/discord >/dev/null 2>&1 || true
+    sudo chmod +x /usr/local/bin/discord >/dev/null 2>&1 || true
 
     # Spotify & Spicetify setup (permissions & marketplace)
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
