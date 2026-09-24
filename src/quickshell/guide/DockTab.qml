@@ -73,6 +73,7 @@ Item {
     property bool currentSmartAutohide: dockSettings && dockSettings.smartAutohide !== undefined ? dockSettings.smartAutohide : true
     property bool currentAutohide: dockSettings && dockSettings.autohide !== undefined ? dockSettings.autohide : false
     property int currentAutohideTimeout: (dockSettings && dockSettings.autohideTimeout !== undefined && !isNaN(parseInt(dockSettings.autohideTimeout))) ? parseInt(dockSettings.autohideTimeout) : 1000
+    property bool currentEditing: dockSettings && dockSettings.editing !== undefined ? dockSettings.editing : false
     property var currentAppsList: (dockSettings && Array.isArray(dockSettings.apps) && dockSettings.apps.length > 0) ? dockSettings.apps : defaultDockSettings.apps
 
     function syncSettings() {
@@ -95,6 +96,7 @@ Item {
         dockTabRoot.currentSmartAutohide = s.smartAutohide !== undefined ? s.smartAutohide : true;
         dockTabRoot.currentAutohide = s.autohide !== undefined ? s.autohide : false;
         dockTabRoot.currentAutohideTimeout = (s.autohideTimeout !== undefined && !isNaN(parseInt(s.autohideTimeout))) ? parseInt(s.autohideTimeout) : 1000;
+        dockTabRoot.currentEditing = s.editing !== undefined ? s.editing : false;
         dockTabRoot.currentAppsList = (s.apps && Array.isArray(s.apps) && s.apps.length > 0) ? s.apps : dockTabRoot.defaultDockSettings.apps;
     }
 
@@ -302,7 +304,14 @@ Item {
                                 if (typeof Sounds !== "undefined") {
                                     Sounds.playSfx(dockTabRoot.currentEditing ? "guide/barconfig/out.wav" : "guide/barconfig/in.wav");
                                 }
-                                Quickshell.execDetached(["bash", Caching.atlanticDir + "/scripts/qs_manager.sh", "close"]);
+                                if (dockTabRoot.currentEditing) {
+                                    if (rootObj && typeof rootObj.closePopup === "function") {
+                                        rootObj.closePopup();
+                                    } else {
+                                        let scr = (Caching.atlanticDir || (rootObj.appPaths && rootObj.appPaths.atlanticDir) || "") + "/scripts/qs_manager.sh";
+                                        Quickshell.execDetached(["bash", scr, "close"]);
+                                    }
+                                }
                             }
                         }
                     }

@@ -15,7 +15,7 @@
     "position": "top",
     "width": 100,
     "opacity": 100,
-    "style": "fill", 
+    "style": "modular", 
     "time": {
       "format": "HH:mm:ss"
     },

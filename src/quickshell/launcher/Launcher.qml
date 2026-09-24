@@ -590,6 +590,20 @@ PanelWindow {
                 let e = entries[i];
                 if (e.noDisplay) continue;
 
+                let idLower = (e.id || "").toLowerCase();
+                let nameLower = (e.name || "").toLowerCase();
+
+                // Hidden apps per user request (remain installed as handlers, hidden from launcher)
+                if (idLower.includes("cloudflare") || nameLower.includes("cloudflare") ||
+                    idLower.includes("warp") || nameLower.includes("warp") ||
+                    idLower.includes("mousepad") || nameLower.includes("mousepad") ||
+                    idLower.includes("evince") || nameLower.includes("document viewer") ||
+                    idLower.includes("file-roller") || idLower.includes("fileroller") || nameLower.includes("file roller") ||
+                    idLower.includes("loupe") || nameLower.includes("image viewer") ||
+                    idLower.includes("mpv") || nameLower.includes("mpv")) {
+                    continue;
+                }
+
                 let score = 0;
                 if (launcherWindow.smartRanking) {
                     let wmclassLower = (e.startupClass || "").toLowerCase();

@@ -121,13 +121,8 @@ Rectangle {
         textColor: isHoveredOrHighlighted ? ThemeBackend.text : (sideKbRoot.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
 
         onClicked: {
-            if (sideKbRoot.isNiri) {
-                Quickshell.execDetached(["niri", "msg", "action", "switch-layout", "next"]);
-            } else if (sideKbRoot.isSway) {
-                Quickshell.execDetached(["swaymsg", "input", "type:keyboard", "xkb_switch_layout", "next"]);
-            } else {
-                Quickshell.execDetached(["hyprctl", "switchxkblayout", "main", "next"]);
-            }
+            let scriptPath = (Caching.atlanticDir || "") + "/scripts/qs_manager.sh";
+            Quickshell.execDetached(["bash", "-c", "atlantic msg toggle keyboard 2>/dev/null || bash \"" + scriptPath + "\" toggle keyboard"]);
         }
     }
 }
