@@ -348,6 +348,7 @@ ALLOWED_SCRIPTS=(
     "monitors_detect"
     "location_manual"
     "blue_light_filter"
+    "setup_hardware"
 )
 
 COMMAND="$1"

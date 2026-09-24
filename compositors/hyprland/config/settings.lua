@@ -27,6 +27,7 @@ hl.config({
     kb_layout = "tr",
     kb_options = "grp:alt_shift_toggle",
     accel_profile = "flat",
+    sensitivity = 0.0,
     touchpad = {
       natural_scroll = true,
       disable_while_typing = false,

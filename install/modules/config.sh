@@ -51,6 +51,13 @@ init_atlantic_config() {
         fi
         mkdir -p "$HOME/.cache/atlantic" 2>/dev/null || true
         echo "tr" > "$HOME/.cache/atlantic/current_layout.txt" 2>/dev/null || true
+
+        local hw_script="$project_root/src/scripts/setup_hardware.sh"
+        if [ -f "$hw_script" ]; then
+            bash "$hw_script" --install >/dev/null 2>&1 || true
+        elif [ -f "$HOME/.local/share/atlantic/src/scripts/setup_hardware.sh" ]; then
+            bash "$HOME/.local/share/atlantic/src/scripts/setup_hardware.sh" --install >/dev/null 2>&1 || true
+        fi
     fi
 
     # Hide unwanted applications from the launcher

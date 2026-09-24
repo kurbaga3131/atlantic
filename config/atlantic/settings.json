@@ -113,6 +113,9 @@
       }
     }
   },
+  "mouse": {
+    "dpi": 1600
+  },
   "dock": {
     "enabled": true,
     "position": "bottom",

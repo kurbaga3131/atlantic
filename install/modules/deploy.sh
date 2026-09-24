@@ -340,8 +340,32 @@ deploy_package() {
                     cp -a "$TARGET_CONFIG_DIR/." "$BACKUP_DIR/" 2>/dev/null || true
                 fi
 
+                local saved_mon_file=""
+                local saved_mon_dest=""
+                if [ "$is_update" = true ]; then
+                    if [ -f "$TARGET_CONFIG_DIR/config/monitors.lua" ]; then
+                        saved_mon_file="$(mktemp)"
+                        cp "$TARGET_CONFIG_DIR/config/monitors.lua" "$saved_mon_file"
+                        saved_mon_dest="$TARGET_CONFIG_DIR/config/monitors.lua"
+                    elif [ -f "$TARGET_CONFIG_DIR/config/output.kdl" ]; then
+                        saved_mon_file="$(mktemp)"
+                        cp "$TARGET_CONFIG_DIR/config/output.kdl" "$saved_mon_file"
+                        saved_mon_dest="$TARGET_CONFIG_DIR/config/output.kdl"
+                    elif [ -f "$TARGET_CONFIG_DIR/configDir/output" ]; then
+                        saved_mon_file="$(mktemp)"
+                        cp "$TARGET_CONFIG_DIR/configDir/output" "$saved_mon_file"
+                        saved_mon_dest="$TARGET_CONFIG_DIR/configDir/output"
+                    fi
+                fi
+
                 mkdir -p "$TARGET_CONFIG_DIR"
                 cp -r "$SRC_COMP_DIR/." "$TARGET_CONFIG_DIR/"
+
+                if [ -n "$saved_mon_file" ] && [ -f "$saved_mon_file" ]; then
+                    mkdir -p "$(dirname "$saved_mon_dest")"
+                    cp "$saved_mon_file" "$saved_mon_dest"
+                    rm -f "$saved_mon_file"
+                fi
 
                 find "$TARGET_CONFIG_DIR" -type f -o -type l | while IFS= read -r dest_file; do
                     local rel_path="${dest_file#$TARGET_CONFIG_DIR/}"
@@ -392,6 +416,9 @@ deploy_package() {
                                 sway) target_config_name="sway" ;;
                                 *) target_config_name="$comp" ;;
                             esac
+                            if [[ "$is_update" == true && ( "$comp_file" == *"monitors"* || "$comp_file" == *"output"* ) ]]; then
+                                continue
+                            fi
                             rm -f "$HOME/.config/$target_config_name/$comp_file"
                         fi
                     done
@@ -434,6 +461,9 @@ deploy_package() {
                                 sway) target_config_name="sway" ;;
                                 *) target_config_name="$comp" ;;
                             esac
+                            if [[ "$is_update" == true && ( "$comp_file" == *"monitors"* || "$comp_file" == *"output"* ) && -f "$HOME/.config/$target_config_name/$comp_file" ]]; then
+                                continue
+                            fi
                             mkdir -p "$(dirname "$HOME/.config/$target_config_name/$comp_file")"
                             cp "$REPO_ROOT/$file" "$HOME/.config/$target_config_name/$comp_file"
                         fi

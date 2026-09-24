@@ -55,7 +55,7 @@ REQUIRED_PKGS=(
     "ffmpeg" "fastfetch" "quickshell" "unzip" "python-websockets" "qt6-websockets"
     "grim" "playerctl" "satty" "xdg-desktop-portal-gtk" "slurp" "wmctrl" "power-profiles-daemon" "easyeffects" "nautilus" "qt5-wayland" "qt5-quickcontrols" "qt5-quickcontrols2" "qt5-graphicaleffects" "qt6-wayland"
     "qt5ct" "qt6ct" "gpu-screen-recorder" "wf-recorder" "adw-gtk-theme" "wl-gammarelay-rs" "google-chrome"
-    "loupe" "mpv" "mousepad" "evince" "file-roller"
+    "loupe" "mpv" "mousepad" "evince" "file-roller" "libratbag"
     "steam" "zenity" "lib32-mesa" "vulkan-radeon" "lib32-vulkan-radeon" "lib32-vulkan-icd-loader" "ttf-liberation"
     "discord" "cloudflare-warp-bin" "spotify" "spicetify-cli" "spicetify-marketplace-bin"
 )

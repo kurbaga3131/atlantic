@@ -18,6 +18,10 @@ check_status() {
 
     touch "$FLAG_FILE"
 
+    if [ -f "$ATLANTIC_DIR/scripts/setup_hardware.sh" ]; then
+        bash "$ATLANTIC_DIR/scripts/setup_hardware.sh" --first-launch >/dev/null 2>&1 &
+    fi
+
     WP_DIR=""
     if type get_setting >/dev/null 2>&1; then
         WP_DIR="$(get_setting "wallpaperDir" "")"

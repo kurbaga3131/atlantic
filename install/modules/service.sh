@@ -106,6 +106,7 @@ setup_services() {
     enable_system_service "NetworkManager" "$init_sys"
     enable_system_service "bluetooth" "$init_sys"
     enable_system_service "power-profiles-daemon" "$init_sys"
+    enable_system_service "ratbagd" "$init_sys"
 
     # Cloudflare WARP requires systemd-resolved for DNS handling on Arch
     if [[ "$init_sys" == "systemd" ]]; then
