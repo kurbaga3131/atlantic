@@ -56,7 +56,7 @@ REQUIRED_PKGS=(
     "grim" "playerctl" "satty" "xdg-desktop-portal-gtk" "slurp" "wmctrl" "power-profiles-daemon" "easyeffects" "nautilus" "qt5-wayland" "qt5-quickcontrols" "qt5-quickcontrols2" "qt5-graphicaleffects" "qt6-wayland"
     "qt5ct" "qt6ct" "gpu-screen-recorder" "wf-recorder" "adw-gtk-theme" "wl-gammarelay-rs" "google-chrome"
     "loupe" "mpv" "mousepad" "evince" "file-roller"
-    "steam" "steam-native-runtime" "zenity" "lib32-mesa" "vulkan-radeon" "lib32-vulkan-radeon" "lib32-vulkan-icd-loader" "ttf-liberation"
+    "steam" "zenity" "lib32-mesa" "vulkan-radeon" "lib32-vulkan-radeon" "lib32-vulkan-icd-loader" "ttf-liberation"
     "discord" "cloudflare-warp-bin" "spotify" "spicetify-cli" "spicetify-marketplace-bin"
 )
 
@@ -180,6 +180,14 @@ install_dependencies() {
     fi
 
     enable_multilib
+
+    # Ensure en_US.UTF-8 locale is generated (strictly required by Steam on Arch)
+    if [ -f /etc/locale.gen ]; then
+        if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
+            sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen 2>/dev/null || true
+            sudo locale-gen >/dev/null 2>&1 || true
+        fi
+    fi
     local target_list=("${REQUIRED_PKGS[@]}")
     for comp in "${compositors[@]}"; do
         target_list+=("$comp")
