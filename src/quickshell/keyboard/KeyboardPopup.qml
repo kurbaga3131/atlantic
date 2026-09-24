@@ -17,8 +17,8 @@ Item {
 
     property real introBase: 0.0
     property string searchQuery: ""
-    property string activeLayoutId: "us"
-    property string activeLayoutName: "English (US)"
+    property string activeLayoutId: "tr"
+    property string activeLayoutName: "Turkish (Q)"
     property string activeKeymapRaw: ""
 
     readonly property var allLayouts: [
@@ -186,9 +186,12 @@ fi
                 } else if (lower.includes("uk") || lower.includes("united kingdom") || lower.includes("\"gb\"") || lower.includes(" gb") || lower === "gb" || lower.startsWith("gb ") || lower.startsWith("gb\n")) {
                     kbPopupRoot.activeLayoutId = "gb";
                     kbPopupRoot.activeLayoutName = "English (UK)";
-                } else {
+                } else if (lower.includes("us") || lower.includes("united states") || lower.includes("\"us\"") || lower.includes(" us") || lower === "us") {
                     kbPopupRoot.activeLayoutId = "us";
                     kbPopupRoot.activeLayoutName = "English (US)";
+                } else {
+                    kbPopupRoot.activeLayoutId = "tr";
+                    kbPopupRoot.activeLayoutName = "Turkish (Q)";
                 }
             }
         }
@@ -401,7 +404,7 @@ fi
 
                             color: isActive
                                 ? Qt.alpha(ThemeBackend.mauve, 0.16)
-                                : (isHovered ? Qt.alpha(ThemeBackend.surface1, 0.55) : Qt.alpha(ThemeBackend.surface0, 0.45))
+                                : (isHovered ? Qt.alpha(ThemeBackend.surface1, 0.5) : Qt.alpha(ThemeBackend.surface0, 0.35))
 
                             border.color: isActive
                                 ? ThemeBackend.mauve
@@ -417,13 +420,15 @@ fi
                                 anchors.rightMargin: kbPopupRoot.s(12)
                                 spacing: kbPopupRoot.s(12)
 
-                                // Flag / Badge Circle
+                                // Flag / Badge Pill Box (consistent width and border on every item)
                                 Rectangle {
-                                    implicitWidth: kbPopupRoot.s(36)
-                                    implicitHeight: kbPopupRoot.s(36)
-                                    Layout.alignment: Qt.AlignVCenter
+                                    implicitWidth: kbPopupRoot.s(42)
+                                    implicitHeight: kbPopupRoot.s(32)
+                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
                                     radius: ThemeBackend.borderRadius
-                                    color: isActive ? Qt.alpha(ThemeBackend.mauve, 0.25) : ThemeBackend.surface0
+                                    color: isActive ? Qt.alpha(ThemeBackend.mauve, 0.25) : Qt.alpha(ThemeBackend.surface1, 0.5)
+                                    border.color: isActive ? ThemeBackend.mauve : Qt.alpha(ThemeBackend.surface2, 0.5)
+                                    border.width: 1
 
                                     Text {
                                         anchors.centerIn: parent
@@ -435,13 +440,14 @@ fi
                                     }
                                 }
 
-                                // Layout Name & Description
+                                // Layout Name & Description - Firmly Left-Aligned
                                 ColumnLayout {
                                     Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignVCenter
-                                    spacing: kbPopupRoot.s(1)
+                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                                    spacing: kbPopupRoot.s(2)
 
                                     RowLayout {
+                                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                                         spacing: kbPopupRoot.s(6)
 
                                         Text {
@@ -450,6 +456,7 @@ fi
                                             font.pixelSize: kbPopupRoot.s(13)
                                             font.bold: true
                                             color: ThemeBackend.text
+                                            horizontalAlignment: Text.AlignLeft
                                         }
 
                                         Text {
@@ -459,40 +466,49 @@ fi
                                     }
 
                                     Text {
+                                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                                         text: modelData.sub
                                         font.family: ThemeBackend.fontFamily
                                         font.pixelSize: kbPopupRoot.s(10)
                                         color: ThemeBackend.subtext0
+                                        horizontalAlignment: Text.AlignLeft
                                     }
                                 }
 
-                                // Active indicator checkmark badge
-                                Rectangle {
-                                    implicitWidth: kbPopupRoot.s(26)
-                                    implicitHeight: kbPopupRoot.s(26)
-                                    Layout.alignment: Qt.AlignVCenter
-                                    radius: kbPopupRoot.s(13)
-                                    visible: isActive
-                                    color: ThemeBackend.mauve
+                                // Right-side action container (always fixed size for perfect horizontal rhythm)
+                                Item {
+                                    implicitWidth: kbPopupRoot.s(28)
+                                    implicitHeight: kbPopupRoot.s(28)
+                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
 
+                                    // Active checkmark badge
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: kbPopupRoot.s(26)
+                                        height: kbPopupRoot.s(26)
+                                        radius: kbPopupRoot.s(13)
+                                        visible: isActive
+                                        color: ThemeBackend.mauve
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "󰄬"
+                                            font.family: ThemeBackend.fontFamily
+                                            font.pixelSize: kbPopupRoot.s(14)
+                                            color: ThemeBackend.crust
+                                            font.bold: true
+                                        }
+                                    }
+
+                                    // Select arrow when hovered and not active
                                     Text {
                                         anchors.centerIn: parent
-                                        text: "󰄬"
+                                        visible: !isActive && isHovered
+                                        text: "󰄾"
                                         font.family: ThemeBackend.fontFamily
                                         font.pixelSize: kbPopupRoot.s(14)
-                                        color: ThemeBackend.crust
-                                        font.bold: true
+                                        color: ThemeBackend.subtext0
                                     }
-                                }
-
-                                // Select arrow when hovered and not active
-                                Text {
-                                    visible: !isActive && isHovered
-                                    text: "󰄾"
-                                    font.family: ThemeBackend.fontFamily
-                                    font.pixelSize: kbPopupRoot.s(14)
-                                    color: ThemeBackend.subtext0
-                                    Layout.alignment: Qt.AlignVCenter
                                 }
                             }
 

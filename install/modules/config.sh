@@ -49,6 +49,8 @@ init_atlantic_config() {
         elif [ -f "$HOME/.local/share/atlantic/src/scripts/location.sh" ]; then
             bash "$HOME/.local/share/atlantic/src/scripts/location.sh" --refresh >/dev/null 2>&1 || true
         fi
+        mkdir -p "$HOME/.cache/atlantic" 2>/dev/null || true
+        echo "tr" > "$HOME/.cache/atlantic/current_layout.txt" 2>/dev/null || true
     fi
 
     # Hide unwanted applications from the launcher

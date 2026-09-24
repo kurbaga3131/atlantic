@@ -24,7 +24,7 @@ hl.config({
   },
 
   input = {
-    kb_layout = "us",
+    kb_layout = "tr",
     kb_options = "grp:alt_shift_toggle",
     accel_profile = "flat",
     touchpad = {

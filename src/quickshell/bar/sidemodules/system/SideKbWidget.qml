@@ -18,7 +18,7 @@ Rectangle {
     property bool moduleActive: true
     property bool isGrouped: false
     property bool isCompact: isGrouped || (isSolid && distinctPills)
-    property string kbLayout: "US"
+    property string kbLayout: "TR"
     property real targetY: 0
     property bool showLayout: false
     property alias kbPill: kbBtn
@@ -48,10 +48,10 @@ Rectangle {
             "bash",
             "-c",
             sideKbRoot.isNiri
-                ? "layout=$(niri msg -j keyboard-layouts 2>/dev/null | jq -r '.names[.current_idx] // empty' | head -n1); [[ -z \"$layout\" || \"$layout\" == \"null\" ]] && layout=\"US\"; echo \"${layout:0:2}\" | tr '[:lower:]' '[:upper:]'"
+                ? "layout=$(niri msg -j keyboard-layouts 2>/dev/null | jq -r '.names[.current_idx] // empty' | head -n1); [[ -z \"$layout\" || \"$layout\" == \"null\" ]] && layout=\"TR\"; echo \"${layout:0:2}\" | tr '[:lower:]' '[:upper:]'"
                 : (sideKbRoot.isSway
-                    ? "layout=$(swaymsg -t get_inputs 2>/dev/null | jq -r '[.[] | select(.type == \"keyboard\" and .xkb_active_layout_name != null)] | .[0].xkb_active_layout_name // empty' | head -n1); [[ -z \"$layout\" || \"$layout\" == \"null\" ]] && layout=\"US\"; echo \"${layout:0:2}\" | tr '[:lower:]' '[:upper:]'"
-                    : "layout=$(LC_ALL=C hyprctl devices -j 2>/dev/null | jq -r '([ .keyboards[] | select(.main == true) ][0] // .keyboards[0]) | (.active_keymap // .layout // empty)' 2>/dev/null | head -n1); [[ -z \"$layout\" || \"$layout\" == \"null\" ]] && [ -f \"$HOME/.cache/atlantic/current_layout.txt\" ] && layout=$(cat \"$HOME/.cache/atlantic/current_layout.txt\" 2>/dev/null); [[ -z \"$layout\" || \"$layout\" == \"null\" ]] && layout=\"US\"; echo \"${layout:0:2}\" | tr '[:lower:]' '[:upper:]'")
+                    ? "layout=$(swaymsg -t get_inputs 2>/dev/null | jq -r '[.[] | select(.type == \"keyboard\" and .xkb_active_layout_name != null)] | .[0].xkb_active_layout_name // empty' | head -n1); [[ -z \"$layout\" || \"$layout\" == \"null\" ]] && layout=\"TR\"; echo \"${layout:0:2}\" | tr '[:lower:]' '[:upper:]'"
+                    : "layout=$(LC_ALL=C hyprctl devices -j 2>/dev/null | jq -r '([ .keyboards[] | select(.main == true) ][0] // .keyboards[0]) | (.active_keymap // .layout // empty)' 2>/dev/null | head -n1); [[ -z \"$layout\" || \"$layout\" == \"null\" ]] && [ -f \"$HOME/.cache/atlantic/current_layout.txt\" ] && layout=$(cat \"$HOME/.cache/atlantic/current_layout.txt\" 2>/dev/null); [[ -z \"$layout\" || \"$layout\" == \"null\" ]] && layout=\"TR\"; echo \"${layout:0:2}\" | tr '[:lower:]' '[:upper:]'")
         ]
         stdout: StdioCollector {
             onStreamFinished: {
