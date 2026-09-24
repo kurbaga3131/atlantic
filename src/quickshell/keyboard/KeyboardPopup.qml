@@ -414,101 +414,103 @@ fi
                             Behavior on color { ColorAnimation { duration: 150 } }
                             Behavior on border.color { ColorAnimation { duration: 150 } }
 
-                            RowLayout {
-                                anchors.fill: parent
+                            // Flag / Badge Pill Box (strictly fixed width and height on every item)
+                            Rectangle {
+                                id: badgeBox
+                                anchors.left: parent.left
                                 anchors.leftMargin: kbPopupRoot.s(12)
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: kbPopupRoot.s(44)
+                                height: kbPopupRoot.s(32)
+                                radius: ThemeBackend.borderRadius
+                                color: isActive ? Qt.alpha(ThemeBackend.mauve, 0.25) : Qt.alpha(ThemeBackend.surface1, 0.5)
+                                border.color: isActive ? ThemeBackend.mauve : Qt.alpha(ThemeBackend.surface2, 0.5)
+                                border.width: 1
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: modelData.badge
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: kbPopupRoot.s(11)
+                                    font.bold: true
+                                    color: isActive ? ThemeBackend.mauve : ThemeBackend.text
+                                }
+                            }
+
+                            // Right-side action container (always fixed size on right edge)
+                            Item {
+                                id: actionBox
+                                anchors.right: parent.right
                                 anchors.rightMargin: kbPopupRoot.s(12)
-                                spacing: kbPopupRoot.s(12)
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: kbPopupRoot.s(28)
+                                height: kbPopupRoot.s(28)
 
-                                // Flag / Badge Pill Box (consistent width and border on every item)
+                                // Active checkmark badge
                                 Rectangle {
-                                    implicitWidth: kbPopupRoot.s(42)
-                                    implicitHeight: kbPopupRoot.s(32)
-                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                                    radius: ThemeBackend.borderRadius
-                                    color: isActive ? Qt.alpha(ThemeBackend.mauve, 0.25) : Qt.alpha(ThemeBackend.surface1, 0.5)
-                                    border.color: isActive ? ThemeBackend.mauve : Qt.alpha(ThemeBackend.surface2, 0.5)
-                                    border.width: 1
+                                    anchors.centerIn: parent
+                                    width: kbPopupRoot.s(26)
+                                    height: kbPopupRoot.s(26)
+                                    radius: kbPopupRoot.s(13)
+                                    visible: isActive
+                                    color: ThemeBackend.mauve
 
                                     Text {
                                         anchors.centerIn: parent
-                                        text: modelData.badge
-                                        font.family: ThemeBackend.fontFamily
-                                        font.pixelSize: kbPopupRoot.s(11)
-                                        font.bold: true
-                                        color: isActive ? ThemeBackend.mauve : ThemeBackend.text
-                                    }
-                                }
-
-                                // Layout Name & Description - Firmly Left-Aligned
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                                    spacing: kbPopupRoot.s(2)
-
-                                    RowLayout {
-                                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-                                        spacing: kbPopupRoot.s(6)
-
-                                        Text {
-                                            text: modelData.name
-                                            font.family: ThemeBackend.fontFamily
-                                            font.pixelSize: kbPopupRoot.s(13)
-                                            font.bold: true
-                                            color: ThemeBackend.text
-                                            horizontalAlignment: Text.AlignLeft
-                                        }
-
-                                        Text {
-                                            text: modelData.flag
-                                            font.pixelSize: kbPopupRoot.s(12)
-                                        }
-                                    }
-
-                                    Text {
-                                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-                                        text: modelData.sub
-                                        font.family: ThemeBackend.fontFamily
-                                        font.pixelSize: kbPopupRoot.s(10)
-                                        color: ThemeBackend.subtext0
-                                        horizontalAlignment: Text.AlignLeft
-                                    }
-                                }
-
-                                // Right-side action container (always fixed size for perfect horizontal rhythm)
-                                Item {
-                                    implicitWidth: kbPopupRoot.s(28)
-                                    implicitHeight: kbPopupRoot.s(28)
-                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-
-                                    // Active checkmark badge
-                                    Rectangle {
-                                        anchors.centerIn: parent
-                                        width: kbPopupRoot.s(26)
-                                        height: kbPopupRoot.s(26)
-                                        radius: kbPopupRoot.s(13)
-                                        visible: isActive
-                                        color: ThemeBackend.mauve
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "󰄬"
-                                            font.family: ThemeBackend.fontFamily
-                                            font.pixelSize: kbPopupRoot.s(14)
-                                            color: ThemeBackend.crust
-                                            font.bold: true
-                                        }
-                                    }
-
-                                    // Select arrow when hovered and not active
-                                    Text {
-                                        anchors.centerIn: parent
-                                        visible: !isActive && isHovered
-                                        text: "󰄾"
+                                        text: "󰄬"
                                         font.family: ThemeBackend.fontFamily
                                         font.pixelSize: kbPopupRoot.s(14)
-                                        color: ThemeBackend.subtext0
+                                        color: ThemeBackend.crust
+                                        font.bold: true
                                     }
+                                }
+
+                                // Select arrow when hovered and not active
+                                Text {
+                                    anchors.centerIn: parent
+                                    visible: !isActive && isHovered
+                                    text: "󰄾"
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: kbPopupRoot.s(14)
+                                    color: ThemeBackend.subtext0
+                                }
+                            }
+
+                            // Layout Name & Description - Strictly Left-Aligned anchored to badgeBox
+                            Column {
+                                id: textCol
+                                anchors.left: badgeBox.right
+                                anchors.leftMargin: kbPopupRoot.s(12)
+                                anchors.right: actionBox.left
+                                anchors.rightMargin: kbPopupRoot.s(8)
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: kbPopupRoot.s(2)
+
+                                Row {
+                                    spacing: kbPopupRoot.s(6)
+
+                                    Text {
+                                        text: modelData.name
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: kbPopupRoot.s(13)
+                                        font.bold: true
+                                        color: ThemeBackend.text
+                                    }
+
+                                    Text {
+                                        text: modelData.flag
+                                        font.pixelSize: kbPopupRoot.s(12)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: modelData.sub
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: kbPopupRoot.s(10)
+                                    color: ThemeBackend.subtext0
+                                    elide: Text.ElideRight
                                 }
                             }
 
