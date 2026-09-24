@@ -148,6 +148,12 @@ EOF' 2>/dev/null || true
             echo -e "\n127.0.0.1 steamloopback.host\n::1 steamloopback.host" | sudo tee -a /etc/hosts >/dev/null 2>&1 || true
         fi
     fi
+    if [ -f /etc/nsswitch.conf ]; then
+        if grep -q "^hosts:" /etc/nsswitch.conf && ! grep -q "^hosts:[[:space:]]*files" /etc/nsswitch.conf; then
+            sudo sed -i -E 's/^hosts:[[:space:]]*(.*)/hosts: files \1/' /etc/nsswitch.conf
+            sudo sed -i -E 's/files ([^f]* )*files/files \1/' /etc/nsswitch.conf
+        fi
+    fi
 
     # Optimize Steam client download speed (disable HTTP/2 throttling on Linux)
     local target_user="${SUDO_USER:-$USER}"

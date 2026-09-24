@@ -414,6 +414,7 @@ mouse:*:*
 
 def fix_steam_loopback():
     hosts_file = "/etc/hosts"
+    nsswitch_file = "/etc/nsswitch.conf"
     try:
         if os.path.exists(hosts_file):
             with open(hosts_file, "r") as f:
@@ -426,6 +427,35 @@ def fix_steam_loopback():
                 elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
                     p = subprocess.Popen(["sudo", "tee", "-a", hosts_file], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                     p.communicate(input=addition.encode())
+    except Exception:
+        pass
+
+    try:
+        if os.path.exists(nsswitch_file):
+            with open(nsswitch_file, "r") as f:
+                lines = f.readlines()
+            new_lines = []
+            modified = False
+            for line in lines:
+                if line.strip().startswith("hosts:"):
+                    parts = line.strip().split()
+                    entries = [p for p in parts[1:] if p != "files"]
+                    new_line = "hosts: files " + " ".join(entries) + "\n"
+                    if new_line != line:
+                        new_lines.append(new_line)
+                        modified = True
+                    else:
+                        new_lines.append(line)
+                else:
+                    new_lines.append(line)
+            if modified:
+                new_content = "".join(new_lines)
+                if os.geteuid() == 0:
+                    with open(nsswitch_file, "w") as f:
+                        f.write(new_content)
+                elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
+                    p = subprocess.Popen(["sudo", "tee", nsswitch_file], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    p.communicate(input=new_content.encode())
     except Exception:
         pass
 

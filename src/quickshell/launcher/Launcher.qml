@@ -989,7 +989,7 @@ if [ ! -d "$HOME/.local/share/Steam/ubuntu12_32/steam-runtime" ]; then
     rm -rf "$HOME/.local/share/Steam/package" "$HOME/.local/share/Steam/tmp" "$HOME/.local/share/Steam/bootstrap.tar.xz" 2>/dev/null || true
 fi
 
-gtk-launch steam 2>/dev/null || steam &
+steam </dev/null >/dev/null 2>&1 &
 `;
             Quickshell.execDetached(["bash", "-c", steamSetupScript]);
             if (Caching.qsDir) {
@@ -997,6 +997,16 @@ gtk-launch steam 2>/dev/null || steam &
             }
             closeLauncher();
             return;
+        }
+
+        let isDiscord = cleanId.indexOf("discord") !== -1 || nameLower.indexOf("discord") !== -1;
+        if (isDiscord && typeof Quickshell !== "undefined") {
+            let discordHook = `
+if ! pgrep -fi discord >/dev/null 2>&1; then
+    rm -f "$HOME/.config/discord/SingletonLock" "$HOME/.config/discord/SingletonSocket" "$HOME/.config/discord/SingletonCookie" 2>/dev/null || true
+fi
+`;
+            Quickshell.execDetached(["bash", "-c", discordHook]);
         }
 
         let isSpotify = cleanId.indexOf("spotify") !== -1 || nameLower.indexOf("spotify") !== -1;

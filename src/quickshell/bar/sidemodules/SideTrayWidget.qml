@@ -188,7 +188,7 @@ Rectangle {
                         isDc = true;
                     }
                     if (isDc && typeof Quickshell !== "undefined") {
-                        Quickshell.execDetached(["bash", "-c", "sleep 0.5; pkill -9 -x Discord 2>/dev/null; pkill -9 -fi discord 2>/dev/null; pkill -9 -fi vesktop 2>/dev/null; rm -f $HOME/.config/discord/SingletonLock $HOME/.config/discord/SingletonSocket 2>/dev/null &"]);
+                        Quickshell.execDetached(["bash", "-c", "pkill -9 -fi discord 2>/dev/null; pkill -9 -fi vesktop 2>/dev/null; rm -f $HOME/.config/discord/SingletonLock $HOME/.config/discord/SingletonSocket $HOME/.config/discord/SingletonCookie 2>/dev/null; sleep 0.2; pkill -9 -fi discord 2>/dev/null; pkill -9 -fi vesktop 2>/dev/null; rm -f $HOME/.config/discord/Singleton* 2>/dev/null"]);
                     }
                 }
 
