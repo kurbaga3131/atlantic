@@ -106,15 +106,31 @@ setup_services() {
     enable_system_service "NetworkManager" "$init_sys"
     enable_system_service "bluetooth" "$init_sys"
     enable_system_service "power-profiles-daemon" "$init_sys"
+
+    # Cloudflare WARP requires systemd-resolved for DNS handling on Arch
+    if [[ "$init_sys" == "systemd" ]]; then
+        enable_system_service "systemd-resolved" "$init_sys"
+        sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
+
+        if [ -d "/etc/NetworkManager" ]; then
+            sudo mkdir -p /etc/NetworkManager/conf.d 2>/dev/null || true
+            sudo bash -c 'cat << "EOF" > /etc/NetworkManager/conf.d/dns.conf
+[main]
+dns=systemd-resolved
+EOF' 2>/dev/null || true
+        fi
+    fi
+
     enable_system_service "warp-svc" "$init_sys"
 
-    # Cloudflare WARP auto-registration (ensure disconnected by default until user enables it)
+    # Cloudflare WARP auto-registration & MASQUE protocol (bypasses ISP UDP blocks in Turkey)
     if command -v warp-cli &>/dev/null; then
         sleep 1
         warp-cli registration new 2>/dev/null || \
         warp-cli --accept-tos registration new 2>/dev/null || \
         warp-cli register 2>/dev/null || true
         warp-cli mode warp 2>/dev/null || true
+        warp-cli tunnel protocol set MASQUE 2>/dev/null || true
         warp-cli disconnect 2>/dev/null || true
     fi
 

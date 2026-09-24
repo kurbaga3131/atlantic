@@ -12,12 +12,19 @@ ensure_warp_registered() {
         return 1
     fi
 
-    if ! systemctl is-active --quiet warp-svc.service 2>/dev/null; then
-        sudo systemctl start warp-svc.service 2>/dev/null || true
-        sleep 1
+    if command -v systemctl &>/dev/null; then
+        if ! systemctl is-active --quiet systemd-resolved.service 2>/dev/null; then
+            sudo systemctl enable --now systemd-resolved.service 2>/dev/null || true
+            sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
+        fi
+        if ! systemctl is-active --quiet warp-svc.service 2>/dev/null; then
+            sudo systemctl start warp-svc.service 2>/dev/null || true
+            sleep 1
+        fi
     fi
 
     if warp-cli registration show >/dev/null 2>&1; then
+        warp-cli tunnel protocol set MASQUE >/dev/null 2>&1 || true
         return 0
     fi
 
@@ -27,6 +34,7 @@ ensure_warp_registered() {
     warp-cli register >/dev/null 2>&1 || true
 
     warp-cli mode warp >/dev/null 2>&1 || true
+    warp-cli tunnel protocol set MASQUE >/dev/null 2>&1 || true
     warp-cli disconnect >/dev/null 2>&1 || true
 }
 
@@ -176,6 +184,7 @@ case "$ACTION" in
     connect)
         rm -f "$CACHE_FILE"
         ensure_warp_registered
+        warp-cli tunnel protocol set MASQUE >/dev/null 2>&1 || true
         warp-cli connect >/dev/null 2>&1 || true
         sleep 0.4
         output_status
@@ -193,6 +202,7 @@ case "$ACTION" in
             warp-cli disconnect >/dev/null 2>&1 || true
         else
             ensure_warp_registered
+            warp-cli tunnel protocol set MASQUE >/dev/null 2>&1 || true
             warp-cli connect >/dev/null 2>&1 || true
         fi
         sleep 0.4
