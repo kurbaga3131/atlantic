@@ -40,6 +40,11 @@ hl.config({
     disable_hyprland_logo = true,
     disable_splash_rendering = true,
   },
+
+  ecosystem = {
+    no_update_news = true,
+    no_donation_nag = true,
+  },
 })
 
 hl.curve("myBezier", { type = "bezier", points = { {0.05, 0.9}, {0.1, 1.05} } })

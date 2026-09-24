@@ -337,13 +337,20 @@ def apply_monitors(monitors):
         for mon in monitors:
             name = mon["name"]
             cfg["display"]["monitors"][name] = {
-                "enabled": True,
+                "enabled": False,
                 "scale": 1,
                 "dimensions": f"{mon['width']}x{mon['height']}",
                 "framerate": str(mon["max_hz"])
             }
         with open(cfg_file, "w") as f:
             json.dump(cfg, f, indent=2)
+    except Exception:
+        pass
+
+    # Reset any active blue light / night light filter to neutral 6500K sRGB
+    try:
+        subprocess.run(["busctl", "--user", "set-property", "rs.wl-gammarelay", "/", "rs.wl.gammarelay", "Temperature", "q", "6500"], capture_output=True, timeout=2)
+        subprocess.run(["pkill", "-9", "-x", "wl-gammarelay-rs"], capture_output=True, timeout=2)
     except Exception:
         pass
 
@@ -410,6 +417,11 @@ def main():
     if mons:
         apply_monitors(mons)
     apply_mouse_dpi(1600)
+    # Ensure night light is neutral
+    try:
+        subprocess.run(["busctl", "--user", "set-property", "rs.wl-gammarelay", "/", "rs.wl.gammarelay", "Temperature", "q", "6500"], capture_output=True, timeout=2)
+    except Exception:
+        pass
 
 if __name__ == "__main__":
     main()

@@ -1462,9 +1462,19 @@ Item {
                                 status: "Connected",
                                 icon: "󰒄"
                             };
+                            let dd = window.disconnectingDevices;
+                            if (dd["warp"]) {
+                                delete dd["warp"];
+                                window.disconnectingDevices = Object.assign({}, dd);
+                            }
                             if (!wasConn && window.activeMode === "vpn") Sounds.playSfx("network/connect.wav");
                         } else {
                             window.vpnConnected = null;
+                            let dd = window.disconnectingDevices;
+                            if (dd["warp"]) {
+                                delete dd["warp"];
+                                window.disconnectingDevices = Object.assign({}, dd);
+                            }
                         }
                         window.syncCores();
                         if (window.activeMode === "vpn") {
@@ -1483,6 +1493,13 @@ Item {
     }
 
     function toggleVpn(enable) {
+        if (enable) {
+            let dd = window.disconnectingDevices;
+            if (dd["warp"]) {
+                delete dd["warp"];
+                window.disconnectingDevices = Object.assign({}, dd);
+            }
+        }
         window.vpnPowerPending = true;
         window.expectedVpnPower = enable ? "on" : "off";
         window.vpnPower = enable ? "on" : "off";

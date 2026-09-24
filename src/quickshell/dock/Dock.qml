@@ -879,21 +879,53 @@ Variants {
                     }
                 }
 
-                function launchApp(desktopId) {
-                    if (!desktopId) return;
+                function launchApp(desktopId, appName) {
+                    if (!desktopId && !appName) return;
+                    let cleanId = (desktopId || "").replace(/\.desktop$/i, "");
+                    let nameLower = (appName || "").toLowerCase();
+
                     if (typeof DesktopEntries !== "undefined") {
-                        let entry = DesktopEntries.byId(desktopId);
+                        let entry = null;
+                        if (desktopId) entry = DesktopEntries.byId(desktopId);
+                        if (!entry && cleanId) entry = DesktopEntries.byId(cleanId);
+                        if (!entry && cleanId) entry = DesktopEntries.byId(cleanId + ".desktop");
+
+                        if (!entry && typeof DesktopEntries.heuristicLookup === "function") {
+                            if (cleanId) entry = DesktopEntries.heuristicLookup(cleanId);
+                            if (!entry && appName) entry = DesktopEntries.heuristicLookup(appName);
+                        }
+
+                        if (!entry && DesktopEntries.applications && DesktopEntries.applications.values) {
+                            let entries = DesktopEntries.applications.values;
+                            for (let i = 0; i < entries.length; i++) {
+                                let e = entries[i];
+                                let eid = (e.id || "").replace(/\.desktop$/i, "").toLowerCase();
+                                let ename = (e.name || "").toLowerCase();
+                                if ((cleanId && eid === cleanId.toLowerCase()) ||
+                                    (nameLower && ename === nameLower) ||
+                                    (cleanId.includes("chrome") && (eid.includes("chrome") || ename.includes("chrome")))) {
+                                    entry = e;
+                                    break;
+                                }
+                            }
+                        }
+
                         if (entry) {
                             entry.execute();
                             return;
                         }
                     }
+
                     if (typeof Quickshell !== "undefined") {
-                        let cmd = desktopId.replace(".desktop", "").toLowerCase();
+                        let cmd = cleanId.toLowerCase();
                         if (cmd.includes("nautilus")) cmd = "nautilus";
                         else if (cmd.includes("pavucontrol")) cmd = "pavucontrol";
                         else if (cmd.includes("easyeffects")) cmd = "easyeffects";
-                        Quickshell.execDetached([cmd]);
+                        else if (cmd.includes("chrome") || nameLower.includes("chrome")) {
+                            cmd = "google-chrome-stable || google-chrome || chromium";
+                        }
+                        let bashCmd = "gtk-launch '" + cleanId + "' 2>/dev/null || gtk-launch '" + (desktopId || "") + "' 2>/dev/null || " + cmd + " &";
+                        Quickshell.execDetached(["bash", "-c", bashCmd]);
                     }
                 }
 
@@ -1925,7 +1957,7 @@ Variants {
                                                     if (typeof Sounds !== "undefined") {
                                                         Sounds.playSfx("reusables/iconbutton/click.wav");
                                                     }
-                                                    dockWindow.launchApp(model.desktop_id);
+                                                    dockWindow.launchApp(model.desktop_id, model.name);
                                                 }
                                             }
                                         }
