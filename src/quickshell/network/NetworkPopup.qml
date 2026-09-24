@@ -1490,7 +1490,7 @@ Item {
         powerMinSpinTimer.restart();
         vpnPendingReset.restart();
         let cmd = enable ? "connect" : "disconnect";
-        Quickshell.execDetached(["bash", "-c", window.scriptsDir + "/warp_panel_logic.sh " + cmd + " >/dev/null 2>&1"]);
+        Quickshell.execDetached(["warp-cli", cmd]);
         vpnRecheckTimer.restart();
     }
 

@@ -123,15 +123,22 @@ EOF' 2>/dev/null || true
 
     enable_system_service "warp-svc" "$init_sys"
 
-    # Cloudflare WARP auto-registration & MASQUE protocol (bypasses ISP UDP blocks in Turkey)
+    # Cloudflare WARP auto-registration
     if command -v warp-cli &>/dev/null; then
         sleep 1
         warp-cli registration new 2>/dev/null || \
         warp-cli --accept-tos registration new 2>/dev/null || \
         warp-cli register 2>/dev/null || true
         warp-cli mode warp 2>/dev/null || true
-        warp-cli tunnel protocol set MASQUE 2>/dev/null || true
         warp-cli disconnect 2>/dev/null || true
+    fi
+
+    # Ensure en_US.UTF-8 locale is generated for Steam compatibility
+    if [ -f /etc/locale.gen ]; then
+        if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
+            sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen 2>/dev/null || true
+            sudo locale-gen >/dev/null 2>&1 || true
+        fi
     fi
 
     # Spotify & Spicetify setup (permissions & marketplace)

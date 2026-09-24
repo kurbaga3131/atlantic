@@ -183,10 +183,8 @@ EOF
 case "$ACTION" in
     connect)
         rm -f "$CACHE_FILE"
-        ensure_warp_registered
-        warp-cli tunnel protocol set MASQUE >/dev/null 2>&1 || true
         warp-cli connect >/dev/null 2>&1 || true
-        sleep 0.4
+        sleep 0.5
         output_status
         ;;
     disconnect)
@@ -201,11 +199,9 @@ case "$ACTION" in
         if [[ "$state" == "connected" ]]; then
             warp-cli disconnect >/dev/null 2>&1 || true
         else
-            ensure_warp_registered
-            warp-cli tunnel protocol set MASQUE >/dev/null 2>&1 || true
             warp-cli connect >/dev/null 2>&1 || true
         fi
-        sleep 0.4
+        sleep 0.5
         output_status
         ;;
     status|*)
