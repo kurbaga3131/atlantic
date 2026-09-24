@@ -487,7 +487,7 @@ Item {
 
     property bool ethPresent: false
     property bool wifiPresent: false
-    property bool btPresent: false
+    property bool btPresent: true
 
     property int btMissCount: 0
     property bool btFirstLoad: true
@@ -1257,8 +1257,6 @@ Item {
         let adapter = Bluetooth.defaultAdapter;
         if (!adapter) {
             window.btMissCount++;
-            if (window.btMissCount >= 2) window.btPresent = false;
-            if (!isCache) validateActiveMode();
             return;
         }
 
@@ -1430,7 +1428,27 @@ Item {
                         let wasConn = window.isVpnConn;
                         window.vpnStatus = data.status || "Disconnected";
                         window.isVpnConn = !!data.connected;
-                        window.vpnPower = (data.connected || data.status === "Connecting") ? "on" : "off";
+                        let fetchedPower = (data.connected || data.status === "Connecting") ? "on" : "off";
+
+                        if (window.vpnPowerPending) {
+                            window.vpnPower = window.expectedVpnPower;
+                            if (window.expectedVpnPower === "on") {
+                                if (data.connected && !powerMinSpinTimer.running) {
+                                    window.vpnPowerPending = false;
+                                    vpnPendingReset.stop();
+                                }
+                            } else if (window.expectedVpnPower === "off") {
+                                if (!data.connected && data.status !== "Connecting" && !powerMinSpinTimer.running) {
+                                    window.vpnPowerPending = false;
+                                    vpnPendingReset.stop();
+                                    window.vpnPower = "off";
+                                }
+                            }
+                        } else {
+                            window.vpnPower = fetchedPower;
+                            window.expectedVpnPower = "";
+                        }
+
                         window.vpnIp = data.ip || "";
                         window.vpnIsp = data.isp || "";
                         window.vpnMode = data.mode || "1.1.1.1 + WARP";
@@ -1454,7 +1472,6 @@ Item {
                         }
                     }
                 } catch(e) {}
-                window.vpnPowerPending = false;
             }
         }
     }
@@ -1468,8 +1485,10 @@ Item {
     function toggleVpn(enable) {
         window.vpnPowerPending = true;
         window.expectedVpnPower = enable ? "on" : "off";
+        window.vpnPower = enable ? "on" : "off";
         if (enable) Sounds.playSfx("network/power_on.wav"); else Sounds.playSfx("network/power_off.wav");
         powerMinSpinTimer.restart();
+        vpnPendingReset.restart();
         let cmd = enable ? "connect" : "disconnect";
         Quickshell.execDetached(["bash", "-c", window.scriptsDir + "/warp_panel_logic.sh " + cmd + " >/dev/null 2>&1"]);
         vpnRecheckTimer.restart();
@@ -1478,7 +1497,8 @@ Item {
     Timer {
         id: vpnRecheckTimer
         interval: 1000
-        repeat: false
+        repeat: window.vpnPowerPending
+        running: window.vpnPowerPending
         onTriggered: window.rebuildVpnData()
     }
 
@@ -2778,7 +2798,7 @@ Item {
                     let m = [];
                     if (window.ethPresent) m.push({ mode: "eth", label: "󰈀  " + (I18n.t("network.tabs.ethernet") || "Ethernet") });
                     if (window.wifiPresent) m.push({ mode: "wifi", label: "󰤨  " + (I18n.t("network.tabs.wifi") || "Wi-Fi") });
-                    if (window.btPresent) m.push({ mode: "bt", label: "󰂯 " + (I18n.t("network.tabs.bluetooth") || "Bluetooth") });
+                    m.push({ mode: "bt", label: "󰂯 " + (I18n.t("network.tabs.bluetooth") || "Bluetooth") });
                     if (window.vpnPresent) m.push({ mode: "vpn", label: "󰒄 " + (I18n.t("network.tabs.vpn") || "WARP") });
                     return m;
                 }

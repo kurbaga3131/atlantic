@@ -104,17 +104,26 @@ setup_services() {
 
     enable_user_service "easyeffects" "$init_sys"
     enable_system_service "NetworkManager" "$init_sys"
+    enable_system_service "bluetooth" "$init_sys"
     enable_system_service "power-profiles-daemon" "$init_sys"
     enable_system_service "warp-svc" "$init_sys"
 
     # Cloudflare WARP auto-registration (ensure disconnected by default until user enables it)
     if command -v warp-cli &>/dev/null; then
-        warp-cli --accept-tos registration new 2>/dev/null || warp-cli register 2>/dev/null || true
+        sleep 1
+        warp-cli registration new 2>/dev/null || \
+        warp-cli --accept-tos registration new 2>/dev/null || \
+        warp-cli register 2>/dev/null || true
+        warp-cli mode warp 2>/dev/null || true
         warp-cli disconnect 2>/dev/null || true
     fi
 
-    # Spotify & Spicetify permissions for UI customization
-    if [ -d "/opt/spotify" ]; then
+    # Spotify & Spicetify setup (permissions & marketplace)
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local spicetify_script="$script_dir/../../src/scripts/setup_spicetify.sh"
+    if [ -f "$spicetify_script" ]; then
+        bash "$spicetify_script" 2>/dev/null || true
+    elif [ -d "/opt/spotify" ]; then
         sudo chmod a+wr /opt/spotify /opt/spotify/Apps -R 2>/dev/null || true
     fi
 }

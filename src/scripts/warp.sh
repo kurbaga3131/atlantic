@@ -7,18 +7,39 @@ ACTION="${1:-status}"
 CACHE_FILE="${XDG_RUNTIME_DIR:-/tmp}/atlantic_warp_cache.json"
 CACHE_TTL=15
 
+ensure_warp_registered() {
+    if ! command -v warp-cli &>/dev/null; then
+        return 1
+    fi
+
+    if ! systemctl is-active --quiet warp-svc.service 2>/dev/null; then
+        sudo systemctl start warp-svc.service 2>/dev/null || true
+        sleep 1
+    fi
+
+    if warp-cli registration show >/dev/null 2>&1; then
+        return 0
+    fi
+
+    # Try modern warp-cli v2024+ syntax first, then legacy
+    warp-cli registration new >/dev/null 2>&1 || \
+    warp-cli --accept-tos registration new >/dev/null 2>&1 || \
+    warp-cli register >/dev/null 2>&1 || true
+
+    warp-cli mode warp >/dev/null 2>&1 || true
+    warp-cli disconnect >/dev/null 2>&1 || true
+}
+
 get_warp_cli_status() {
     if ! command -v warp-cli &>/dev/null; then
         echo "not_installed"
         return
     fi
     local raw
-    raw=$(warp-cli status 2>/dev/null || true)
-    if [[ -z "$raw" ]]; then
-        # Try registration if needed (keep disconnected by default)
-        warp-cli --accept-tos registration new >/dev/null 2>&1 || true
-        warp-cli disconnect >/dev/null 2>&1 || true
-        raw=$(warp-cli status 2>/dev/null || true)
+    raw=$(warp-cli status 2>&1 || true)
+    if [[ -z "$raw" ]] || echo "$raw" | grep -qiE "missing|register|error|daemon|socket"; then
+        ensure_warp_registered
+        raw=$(warp-cli status 2>&1 || true)
     fi
 
     if echo "$raw" | grep -qi "connecting"; then
@@ -154,12 +175,15 @@ EOF
 case "$ACTION" in
     connect)
         rm -f "$CACHE_FILE"
+        ensure_warp_registered
         warp-cli connect >/dev/null 2>&1 || true
+        sleep 0.4
         output_status
         ;;
     disconnect)
         rm -f "$CACHE_FILE"
         warp-cli disconnect >/dev/null 2>&1 || true
+        sleep 0.3
         output_status
         ;;
     toggle)
@@ -168,8 +192,10 @@ case "$ACTION" in
         if [[ "$state" == "connected" ]]; then
             warp-cli disconnect >/dev/null 2>&1 || true
         else
+            ensure_warp_registered
             warp-cli connect >/dev/null 2>&1 || true
         fi
+        sleep 0.4
         output_status
         ;;
     status|*)
