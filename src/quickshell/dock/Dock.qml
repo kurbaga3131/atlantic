@@ -55,6 +55,7 @@ Variants {
                 exclusionMode: ExclusionMode.Ignore
 
                 property int configRevision: 0
+                property int dockAppsVersion: 0
                 property bool initialized: false
 
                 readonly property real screenWidth: (dockWindow.screen && dockWindow.screen.width > 0) ? dockWindow.screen.width : (dockScope.modelData && dockScope.modelData.width > 0 ? dockScope.modelData.width : 0)
@@ -611,6 +612,23 @@ Variants {
                     id: dockAppsModel
                 }
 
+                function isAppMatch(itemA, itemBId, itemBName) {
+                    if (!itemA) return false;
+                    let aId = (itemA.desktop_id || itemA.id || "").replace(/\.desktop$/i, "").toLowerCase().trim();
+                    let aName = (itemA.name || "").toLowerCase().trim();
+                    let bId = (itemBId || "").replace(/\.desktop$/i, "").toLowerCase().trim();
+                    let bName = (itemBName || "").toLowerCase().trim();
+
+                    if (bId && aId) {
+                        if (aId === bId) return true;
+                        if (aId.endsWith("." + bId) || bId.endsWith("." + aId)) return true;
+                    }
+                    if (bName && aName && aName === bName) {
+                        return true;
+                    }
+                    return false;
+                }
+
                 function loadApps() {
                     let customApps = rawDockSettings.apps;
                     if (!customApps || !Array.isArray(customApps) || customApps.length === 0) {
@@ -627,6 +645,31 @@ Variants {
                             Config.setSetting("dock", current);
                         }
                     }
+
+                    // Deduplicate existing apps in settings if any duplicates were present
+                    let uniqueApps = [];
+                    for (let d = 0; d < customApps.length; d++) {
+                        let appItem = customApps[d];
+                        let isDup = false;
+                        for (let u = 0; u < uniqueApps.length; u++) {
+                            if (isAppMatch(uniqueApps[u], appItem.desktop_id || appItem.id, appItem.name)) {
+                                isDup = true;
+                                break;
+                            }
+                        }
+                        if (!isDup) {
+                            uniqueApps.push(appItem);
+                        }
+                    }
+                    if (uniqueApps.length !== customApps.length) {
+                        customApps = uniqueApps;
+                        let current = JSON.parse(JSON.stringify(rawDockSettings || defaultDockSettings));
+                        current.apps = customApps;
+                        if (typeof Config !== "undefined" && typeof Config.setSetting === "function") {
+                            Config.setSetting("dock", current);
+                        }
+                    }
+
                     if (dockAppsModel.count === customApps.length) {
                         let matches = true;
                         for (let i = 0; i < customApps.length; i++) {
@@ -650,6 +693,7 @@ Variants {
                             icon: app.icon || ""
                         });
                     }
+                    dockWindow.dockAppsVersion++;
                 }
 
                 function saveApps() {
@@ -675,13 +719,13 @@ Variants {
                     if (typeof Config !== "undefined" && typeof Config.setSetting === "function") {
                         Config.setSetting("dock", current);
                     }
+                    dockWindow.dockAppsVersion++;
                 }
 
-                function isAppInDock(desktopId) {
-                    if (!desktopId) return false;
+                function isAppInDock(desktopId, appName) {
+                    let dummy = dockWindow.dockAppsVersion;
                     for (let i = 0; i < dockAppsModel.count; i++) {
-                        let it = dockAppsModel.get(i);
-                        if (it && it.desktop_id === desktopId) return true;
+                        if (isAppMatch(dockAppsModel.get(i), desktopId, appName)) return true;
                     }
                     return false;
                 }
@@ -689,9 +733,12 @@ Variants {
                 function addApp(entry) {
                     if (!entry) return;
                     let id = entry.id || entry.desktop_id || "";
-                    if (isAppInDock(id)) return;
-                    dockAppsModel.append({
-                        name: entry.name || "",
+                    let name = entry.name || "";
+                    if (isAppInDock(id, name)) return;
+
+                    // Add new app to the left (beginning of list)
+                    dockAppsModel.insert(0, {
+                        name: name,
                         comment: entry.comment || "",
                         desktop_id: id,
                         icon: entry.icon || ""
@@ -699,10 +746,9 @@ Variants {
                     saveApps();
                 }
 
-                function removeAppByDesktopId(desktopId) {
+                function removeAppByDesktopId(desktopId, appName) {
                     for (let i = 0; i < dockAppsModel.count; i++) {
-                        let it = dockAppsModel.get(i);
-                        if (it && it.desktop_id === desktopId) {
+                        if (isAppMatch(dockAppsModel.get(i), desktopId, appName)) {
                             dockAppsModel.remove(i, 1);
                             saveApps();
                             return;
@@ -766,6 +812,21 @@ Variants {
                         for (let i = 0; i < entries.length; i++) {
                             let e = entries[i];
                             if (e.noDisplay) continue;
+
+                            let idLower = (e.id || "").toLowerCase();
+                            let nameLower = (e.name || "").toLowerCase();
+
+                            // Hidden apps per user request (remain installed as handlers, hidden from dock picker)
+                            if (idLower.includes("cloudflare") || nameLower.includes("cloudflare") ||
+                                idLower.includes("warp") || nameLower.includes("warp") ||
+                                idLower.includes("mousepad") || nameLower.includes("mousepad") ||
+                                idLower.includes("evince") || nameLower.includes("document viewer") ||
+                                idLower.includes("file-roller") || idLower.includes("fileroller") || nameLower.includes("file roller") ||
+                                idLower.includes("loupe") || nameLower.includes("image viewer") ||
+                                idLower.includes("mpv") || nameLower.includes("mpv")) {
+                                continue;
+                            }
+
                             list.push({
                                 id: e.id || "",
                                 name: e.name || "",
@@ -2043,7 +2104,7 @@ Variants {
                                         height: dockWindow.s(44)
                                         radius: ThemeBackend.borderRadius
                                         readonly property var resolvedItem: (modelData !== undefined && modelData) ? modelData : model
-                                        readonly property bool isAdded: dockWindow.isAppInDock(resolvedItem.id || "")
+                                        readonly property bool isAdded: dockWindow.isAppInDock(resolvedItem.id || "", resolvedItem.name || "")
 
                                         color: isAdded ? ThemeBackend.mauve : (pickerMa.containsMouse ? Qt.alpha(ThemeBackend.surface1, 0.4) : Qt.alpha(ThemeBackend.surface0, 0.25))
                                         border.width: 0
@@ -2138,7 +2199,7 @@ Variants {
                                                     Sounds.playSfx("reusables/iconbutton/click.wav");
                                                 }
                                                 if (pickerDelegate.isAdded) {
-                                                    dockWindow.removeAppByDesktopId(pickerDelegate.resolvedItem.id);
+                                                    dockWindow.removeAppByDesktopId(pickerDelegate.resolvedItem.id, pickerDelegate.resolvedItem.name);
                                                 } else {
                                                     dockWindow.addApp(pickerDelegate.resolvedItem);
                                                 }

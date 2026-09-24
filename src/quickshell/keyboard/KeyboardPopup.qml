@@ -22,17 +22,15 @@ Item {
     property string activeKeymapRaw: ""
 
     readonly property var allLayouts: [
-        { id: "tr", code: "tr", variant: "", name: "Türkçe Q", sub: "Turkish QWERTY", badge: "TR", flag: "🇹🇷" },
+        { id: "tr", code: "tr", variant: "", name: "Turkish (Q)", sub: "Turkish QWERTY", badge: "TR", flag: "🇹🇷" },
         { id: "us", code: "us", variant: "", name: "English (US)", sub: "United States QWERTY", badge: "US", flag: "🇺🇸" },
-        { id: "tr-f", code: "tr", variant: "f", name: "Türkçe F", sub: "Turkish F Layout", badge: "TR-F", flag: "🇹🇷" },
+        { id: "tr-f", code: "tr", variant: "f", name: "Turkish (F)", sub: "Turkish F Layout", badge: "TR-F", flag: "🇹🇷" },
         { id: "gb", code: "gb", variant: "", name: "English (UK)", sub: "United Kingdom Layout", badge: "UK", flag: "🇬🇧" },
-        { id: "de", code: "de", variant: "", name: "Deutsch", sub: "German QWERTZ Layout", badge: "DE", flag: "🇩🇪" },
-        { id: "fr", code: "fr", variant: "", name: "Français", sub: "French AZERTY Layout", badge: "FR", flag: "🇫🇷" },
-        { id: "es", code: "es", variant: "", name: "Español", sub: "Spanish Layout", badge: "ES", flag: "🇪🇸" },
-        { id: "ru", code: "ru", variant: "", name: "Русский", sub: "Russian Cyrillic Layout", badge: "RU", flag: "🇷🇺" },
-        { id: "it", code: "it", variant: "", name: "Italiano", sub: "Italian Layout", badge: "IT", flag: "🇮🇹" },
-        { id: "az", code: "az", variant: "", name: "Azərbaycan", sub: "Azerbaijani Layout", badge: "AZ", flag: "🇦🇿" },
-        { id: "ara", code: "ara", variant: "", name: "العربية", sub: "Arabic Layout", badge: "AR", flag: "🇸🇦" }
+        { id: "de", code: "de", variant: "", name: "German", sub: "German QWERTZ Layout", badge: "DE", flag: "🇩🇪" },
+        { id: "fr", code: "fr", variant: "", name: "French", sub: "French AZERTY Layout", badge: "FR", flag: "🇫🇷" },
+        { id: "es", code: "es", variant: "", name: "Spanish", sub: "Spanish Layout", badge: "ES", flag: "🇪🇸" },
+        { id: "ru", code: "ru", variant: "", name: "Russian", sub: "Russian Cyrillic Layout", badge: "RU", flag: "🇷🇺" },
+        { id: "it", code: "it", variant: "", name: "Italian", sub: "Italian Layout", badge: "IT", flag: "🇮🇹" }
     ]
 
     readonly property var filteredLayouts: {
@@ -60,15 +58,71 @@ Item {
             Sounds.playSfx("guide/barconfig/in.wav");
         }
 
-        let scriptPath = (Caching.atlanticDir || "") + "/scripts/system/switch_kb.sh";
-        switchProc.command = ["bash", scriptPath, item.code, item.variant || ""];
-        switchProc.running = true;
+        let code = item.code;
+        let variant = item.variant || "";
+        let id = item.id;
+        let dir = (typeof Caching !== "undefined" && Caching.atlanticDir) ? Caching.atlanticDir : "";
+
+        let cmd = `
+mkdir -p "$HOME/.cache/atlantic" 2>/dev/null
+echo "${id}" > "$HOME/.cache/atlantic/current_layout.txt" 2>/dev/null || true
+
+for s in "${dir}/scripts/system/switch_kb.sh" "$HOME/.local/share/atlantic/src/scripts/system/switch_kb.sh" "/usr/local/share/atlantic/src/scripts/system/switch_kb.sh"; do
+    if [ -f "$s" ]; then
+        bash "$s" "${code}" "${variant}"
+        exit 0
+    fi
+done
+
+if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ] || pgrep -x Hyprland &>/dev/null; then
+    hyprctl keyword input:kb_layout "${code}" >/dev/null 2>&1 || true
+    if [ -n "${variant}" ]; then
+        hyprctl keyword input:kb_variant "${variant}" >/dev/null 2>&1 || true
+    else
+        hyprctl keyword input:kb_variant "" >/dev/null 2>&1 || true
+    fi
+    hyprctl devices -j 2>/dev/null | jq -r '.keyboards[].name // empty' 2>/dev/null | while read -r kb; do
+        [ -n "$kb" ] || continue
+        hyprctl keyword "device:$kb:kb_layout" "${code}" >/dev/null 2>&1 || true
+        hyprctl keyword "device[$kb]:kb_layout" "${code}" >/dev/null 2>&1 || true
+        hyprctl switchxkblayout "$kb" 0 >/dev/null 2>&1 || true
+    done
+    hyprctl switchxkblayout all 0 >/dev/null 2>&1 || true
+    if [ -f "$HOME/.config/hypr/config/settings.lua" ]; then
+        sed -i -E 's/^[[:space:]]*kb_layout[[:space:]]*=[[:space:]]*"[^"]*"/    kb_layout = "${code}"/' "$HOME/.config/hypr/config/settings.lua" 2>/dev/null || true
+    fi
+    hyprctl reload >/dev/null 2>&1 || true
+elif [ -n "$NIRI_SOCKET" ] || pgrep -x niri &>/dev/null; then
+    niri msg action switch-layout "${code}" >/dev/null 2>&1 || true
+elif [ -n "$SWAYSOCK" ] || pgrep -x sway &>/dev/null; then
+    swaymsg input "type:keyboard" xkb_layout "${code}" >/dev/null 2>&1 || true
+fi
+
+if command -v setxkbmap &>/dev/null; then
+    if [ -n "${variant}" ]; then
+        setxkbmap -layout "${code}" -variant "${variant}" >/dev/null 2>&1 || true
+    else
+        setxkbmap -layout "${code}" >/dev/null 2>&1 || true
+    fi
+fi
+`;
+        Quickshell.execDetached(["bash", "-c", cmd]);
 
         closeTimer.restart();
     }
 
     function closePopup() {
-        Quickshell.execDetached(["bash", (Caching.atlanticDir || "") + "/scripts/qs_manager.sh", "close"]);
+        let dir = (typeof Caching !== "undefined" && Caching.atlanticDir) ? Caching.atlanticDir : "";
+        let runClose = `
+for s in "${dir}/scripts/qs_manager.sh" "$HOME/.local/share/atlantic/src/scripts/qs_manager.sh" "/usr/local/share/atlantic/src/scripts/qs_manager.sh"; do
+    if [ -f "$s" ]; then
+        bash "$s" close
+        exit 0
+    fi
+done
+quickshell ipc call main handleCommand close "" "" 2>/dev/null || true
+`;
+        Quickshell.execDetached(["bash", "-c", runClose]);
     }
 
     Timer {
@@ -84,43 +138,52 @@ Item {
         command: [
             "bash",
             "-c",
-            "LC_ALL=C hyprctl devices -j 2>/dev/null | jq -r '(.keyboards[] | select(.main == true) | .active_keymap) // .keyboards[0].active_keymap // empty' | head -n1"
+            `
+if [ -f "$HOME/.cache/atlantic/current_layout.txt" ]; then
+    cat "$HOME/.cache/atlantic/current_layout.txt"
+fi
+if command -v hyprctl &>/dev/null && { [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ] || pgrep -x Hyprland &>/dev/null; }; then
+    LC_ALL=C hyprctl devices -j 2>/dev/null | jq -r '
+      ([ .keyboards[] | select(.main == true) ][0] // .keyboards[0]) as $kb |
+      if $kb then (($kb.active_keymap // "") + " " + ($kb.layout // "") + " " + ($kb.variant // "")) else empty end
+    '
+elif command -v niri &>/dev/null && { [ -n "$NIRI_SOCKET" ] || pgrep -x niri &>/dev/null; }; then
+    niri msg -j keyboard-layouts 2>/dev/null | jq -r '.names[.current_idx] // empty'
+elif command -v swaymsg &>/dev/null && { [ -n "$SWAYSOCK" ] || pgrep -x sway &>/dev/null; }; then
+    swaymsg -t get_inputs 2>/dev/null | jq -r '[.[] | select(.type == "keyboard" and .xkb_active_layout_name != null)][0].xkb_active_layout_name // empty'
+fi
+if [ -f "$HOME/.config/hypr/config/settings.lua" ]; then
+    grep -E '^[[:space:]]*kb_layout[[:space:]]*=' "$HOME/.config/hypr/config/settings.lua" | head -n1
+fi
+            `
         ]
         stdout: StdioCollector {
             onStreamFinished: {
                 let txt = this.text.trim();
                 kbPopupRoot.activeKeymapRaw = txt;
                 let lower = txt.toLowerCase();
-                if (lower.includes("turkish") || lower.includes("türk")) {
-                    if (lower.includes("(f)") || lower.includes(" f")) {
-                        kbPopupRoot.activeLayoutId = "tr-f";
-                        kbPopupRoot.activeLayoutName = "Türkçe F";
-                    } else {
-                        kbPopupRoot.activeLayoutId = "tr";
-                        kbPopupRoot.activeLayoutName = "Türkçe Q";
-                    }
-                } else if (lower.includes("german") || lower.includes("deutsch")) {
+                if (lower.includes("tr-f") || lower.includes("turkish (f)") || lower.includes("turkish f") || (lower.includes("turkish") && lower.includes(" f")) || (lower.includes(" tr") && lower.includes(" f"))) {
+                    kbPopupRoot.activeLayoutId = "tr-f";
+                    kbPopupRoot.activeLayoutName = "Turkish (F)";
+                } else if (lower.includes("turkish") || lower.includes("türk") || lower.includes("\"tr\"") || lower.includes(" tr") || lower === "tr" || lower.startsWith("tr ") || lower.startsWith("tr\n")) {
+                    kbPopupRoot.activeLayoutId = "tr";
+                    kbPopupRoot.activeLayoutName = "Turkish (Q)";
+                } else if (lower.includes("german") || lower.includes("deutsch") || lower.includes("\"de\"") || lower.includes(" de") || lower === "de" || lower.startsWith("de ") || lower.startsWith("de\n")) {
                     kbPopupRoot.activeLayoutId = "de";
-                    kbPopupRoot.activeLayoutName = "Deutsch";
-                } else if (lower.includes("french") || lower.includes("français")) {
+                    kbPopupRoot.activeLayoutName = "German";
+                } else if (lower.includes("french") || lower.includes("français") || lower.includes("\"fr\"") || lower.includes(" fr") || lower === "fr" || lower.startsWith("fr ") || lower.startsWith("fr\n")) {
                     kbPopupRoot.activeLayoutId = "fr";
-                    kbPopupRoot.activeLayoutName = "Français";
-                } else if (lower.includes("spanish") || lower.includes("español")) {
+                    kbPopupRoot.activeLayoutName = "French";
+                } else if (lower.includes("spanish") || lower.includes("español") || lower.includes("\"es\"") || lower.includes(" es") || lower === "es" || lower.startsWith("es ") || lower.startsWith("es\n")) {
                     kbPopupRoot.activeLayoutId = "es";
-                    kbPopupRoot.activeLayoutName = "Español";
-                } else if (lower.includes("russian") || lower.includes("русский")) {
+                    kbPopupRoot.activeLayoutName = "Spanish";
+                } else if (lower.includes("russian") || lower.includes("русский") || lower.includes("\"ru\"") || lower.includes(" ru") || lower === "ru" || lower.startsWith("ru ") || lower.startsWith("ru\n")) {
                     kbPopupRoot.activeLayoutId = "ru";
-                    kbPopupRoot.activeLayoutName = "Русский";
-                } else if (lower.includes("italian") || lower.includes("italiano")) {
+                    kbPopupRoot.activeLayoutName = "Russian";
+                } else if (lower.includes("italian") || lower.includes("italiano") || lower.includes("\"it\"") || lower.includes(" it") || lower === "it" || lower.startsWith("it ") || lower.startsWith("it\n")) {
                     kbPopupRoot.activeLayoutId = "it";
-                    kbPopupRoot.activeLayoutName = "Italiano";
-                } else if (lower.includes("azerbaijan")) {
-                    kbPopupRoot.activeLayoutId = "az";
-                    kbPopupRoot.activeLayoutName = "Azərbaycan";
-                } else if (lower.includes("arabic")) {
-                    kbPopupRoot.activeLayoutId = "ara";
-                    kbPopupRoot.activeLayoutName = "العربية";
-                } else if (lower.includes("uk") || lower.includes("united kingdom")) {
+                    kbPopupRoot.activeLayoutName = "Italian";
+                } else if (lower.includes("uk") || lower.includes("united kingdom") || lower.includes("\"gb\"") || lower.includes(" gb") || lower === "gb" || lower.startsWith("gb ") || lower.startsWith("gb\n")) {
                     kbPopupRoot.activeLayoutId = "gb";
                     kbPopupRoot.activeLayoutName = "English (UK)";
                 } else {
@@ -129,12 +192,6 @@ Item {
                 }
             }
         }
-    }
-
-    Process {
-        id: switchProc
-        running: false
-        command: []
     }
 
     property real globalOrbitAngle: 0
@@ -233,7 +290,7 @@ Item {
                     spacing: kbPopupRoot.s(2)
 
                     Text {
-                        text: typeof I18n !== "undefined" ? I18n.t("widgets.keyboard", "Keyboard Layout") : "Keyboard Layout"
+                        text: "Keyboard Layout"
                         font.family: ThemeBackend.fontFamily
                         font.pixelSize: kbPopupRoot.s(15)
                         font.bold: true
