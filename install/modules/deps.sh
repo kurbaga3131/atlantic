@@ -53,7 +53,7 @@ REQUIRED_PKGS=(
     "pipewire" "wireplumber" "pipewire-pulse" "pipewire-alsa" "libpulse" "python"
     "imagemagick" "wget" "file" "git" "psmisc"
     "ffmpeg" "fastfetch" "quickshell" "unzip" "python-websockets" "qt6-websockets"
-    "grim" "playerctl" "satty" "xdg-desktop-portal-gtk" "slurp" "wmctrl" "power-profiles-daemon" "easyeffects" "nautilus" "qt5-wayland" "qt5-quickcontrols" "qt5-quickcontrols2" "qt5-graphicaleffects" "qt6-wayland"
+    "grim" "playerctl" "satty" "xdg-desktop-portal-gtk" "slurp" "wmctrl" "power-profiles-daemon" "easyeffects" "lsp-plugins-lv2" "calf" "nautilus" "qt5-wayland" "qt5-quickcontrols" "qt5-quickcontrols2" "qt5-graphicaleffects" "qt6-wayland"
     "qt5ct" "qt6ct" "gpu-screen-recorder" "wf-recorder" "adw-gtk-theme" "wl-gammarelay-rs" "google-chrome"
     "steam" "zenity" "lib32-systemd" "xorg-server-xvfb" "ttf-liberation" "ttf-dejavu" "lib32-fontconfig"
     "vulkan-icd-loader" "lib32-vulkan-icd-loader" "vulkan-tools" "mesa" "lib32-mesa"

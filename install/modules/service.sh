@@ -100,6 +100,30 @@ setup_services() {
     if [[ "$init_sys" == "systemd" ]]; then
         sudo systemctl --global enable pipewire wireplumber pipewire-pulse 2>/dev/null || true
         systemctl --user start pipewire wireplumber pipewire-pulse 2>/dev/null || true
+
+        mkdir -p "$HOME/.config/systemd/user"
+        cat << "EOF" > "$HOME/.config/systemd/user/easyeffects.service"
+[Unit]
+Description=EasyEffects Daemon
+PartOf=pipewire.service
+After=pipewire.service
+
+[Service]
+Type=dbus
+BusName=com.github.wwmm.easyeffects
+ExecStart=/usr/bin/easyeffects --gapplication-service
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+EOF
+        systemctl --user daemon-reload 2>/dev/null || true
+    fi
+
+    if command -v gsettings >/dev/null 2>&1; then
+        gsettings set com.github.wwmm.easyeffects process-all-outputs true 2>/dev/null || true
+        gsettings set com.github.wwmm.easyeffects bypass false 2>/dev/null || true
     fi
 
     enable_user_service "easyeffects" "$init_sys"
