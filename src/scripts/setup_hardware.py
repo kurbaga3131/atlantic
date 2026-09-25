@@ -476,6 +476,14 @@ def fix_steam_config():
         # ~/.steam/steam and ~/.steam/root MUST be symlinks, NEVER directories!
         for lpath in [steam_link, steam_root]:
             if os.path.exists(lpath) and not os.path.islink(lpath):
+                try:
+                    for item in os.listdir(lpath):
+                        s = os.path.join(lpath, item)
+                        d = os.path.join(steam_data, item)
+                        if not os.path.exists(d):
+                            shutil.move(s, d)
+                except Exception:
+                    pass
                 shutil.rmtree(lpath, ignore_errors=True)
             if not os.path.exists(lpath) and not os.path.islink(lpath):
                 try:
@@ -489,9 +497,9 @@ def fix_steam_config():
             with open(fpath, "w") as f:
                 f.write(cfg_content)
 
-        # Remove stale lockfiles that prevent Steam from opening (only if steam is not running)
-        for lck in [".steam_is_running.lock", "steam.pid", "steam.pipe"]:
-            for sdir in [steam_data, steam_link_dir]:
+        # Remove stale lockfiles that prevent Steam from opening
+        for lck in [".steam_is_running.lock", "steam.pid", "steam.pipe", "steam.sockets"]:
+            for sdir in [steam_data, steam_link_dir, os.path.join(steam_link_dir, "root")]:
                 f = os.path.join(sdir, lck)
                 if os.path.exists(f):
                     try:

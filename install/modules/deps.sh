@@ -182,10 +182,18 @@ install_dependencies() {
 
     enable_multilib
 
-    # Ensure en_US.UTF-8 locale is generated (strictly required by Steam on Arch)
+    # Ensure en_US.UTF-8 and tr_TR.UTF-8 locales are generated for Steam & system compatibility
     if [ -f /etc/locale.gen ]; then
+        local need_gen=false
         if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
             sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen 2>/dev/null || true
+            need_gen=true
+        fi
+        if ! grep -q "^tr_TR.UTF-8 UTF-8" /etc/locale.gen; then
+            sudo sed -i 's/^# *tr_TR.UTF-8 UTF-8/tr_TR.UTF-8 UTF-8/' /etc/locale.gen 2>/dev/null || true
+            need_gen=true
+        fi
+        if [ "$need_gen" = true ]; then
             sudo locale-gen >/dev/null 2>&1 || true
         fi
     fi
