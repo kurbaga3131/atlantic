@@ -15,8 +15,9 @@ hl.config({
     blur = {
       enabled = true,
       size = 8,
-      passes = 2,
+      passes = 3,
       new_optimizations = true,
+      ignore_opacity = true,
     },
     shadow = {
       enabled = false,
@@ -75,6 +76,7 @@ hl.window_rule({
   },
   float = true,
   center = true,
+  opacity = "0.90 0.85",
 })
 
 hl.window_rule({
@@ -84,5 +86,46 @@ hl.window_rule({
   float = true,
   center = true,
 })
+
+-- System applications dark glass transparency rules
+hl.window_rule({
+  match = {
+    class = "(?i)(org\\.gnome\\.nautilus|nautilus)",
+  },
+  opacity = "0.85 0.78",
+})
+
+hl.window_rule({
+  match = {
+    class = "(?i)thunar",
+  },
+  opacity = "0.85 0.78",
+})
+
+hl.window_rule({
+  match = {
+    class = "(?i)(pavucontrol|org\\.pulseaudio\\.pavucontrol)",
+  },
+  float = true,
+  center = true,
+  opacity = "0.86 0.78",
+})
+
+hl.window_rule({
+  match = {
+    class = "(?i)easyeffects",
+  },
+  opacity = "0.88 0.80",
+})
+
+hl.window_rule({
+  match = {
+    class = "(?i)(nm-connection-editor|blueman-manager)",
+  },
+  float = true,
+  center = true,
+  opacity = "0.86 0.78",
+})
+
 
 
