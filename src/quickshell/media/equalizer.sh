@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/../../scripts/caching.sh"
-qs_ensure_cache "music"
+source "$(dirname "${BASH_SOURCE[0]}")/../../scripts/caching.sh" 2>/dev/null || true
+if [ -z "$QS_RUN_MUSIC" ]; then
+    QS_RUN_MUSIC="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/atlantic/music"
+    mkdir -p "$QS_RUN_MUSIC"
+fi
 
 STATE_FILE="$QS_RUN_MUSIC/eq_state.json"
 PRESET_DIR1="$HOME/.config/easyeffects/output"
@@ -15,41 +18,66 @@ if [ ! -f "$STATE_FILE" ]; then
 fi
 
 apply_eq() {
-    vals=$(cat "$STATE_FILE")
-    json_output=$(python3 -c "
-import sys, json
+    vals=$(cat "$STATE_FILE" 2>/dev/null || echo '{"b1":0}')
+
+    # 1. Generate 32-band EasyEffects preset matching GUI structure
+    python3 -c '
+import sys, json, math, os, socket
 
 try:
     data = json.loads(sys.argv[1])
-    freqs = [31.0, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0]
-    gains = [float(data.get(f'b{i+1}', 0.0)) for i in range(10)]
+    anchors = [31.0, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0]
+    user_gains = [float(data.get("b" + str(i + 1), 0.0)) for i in range(10)]
+
+    freqs_32 = [
+        22.0, 28.0, 35.0, 45.0, 57.0, 71.0, 90.0, 112.0,
+        141.0, 178.0, 224.0, 282.0, 355.0, 447.0, 562.0, 708.0,
+        891.0, 1122.0, 1414.0, 1782.0, 2245.0, 2828.0, 3564.0, 4490.0,
+        5657.0, 7127.0, 8980.0, 11314.0, 14254.0, 17959.0, 20000.0, 22000.0
+    ]
+
+    log_anchors = [math.log10(a) for a in anchors]
+    interpolated_gains = []
+    for f in freqs_32:
+        lf = math.log10(f)
+        if lf <= log_anchors[0]:
+            g = user_gains[0]
+        elif lf >= log_anchors[-1]:
+            g = user_gains[-1]
+        else:
+            for i in range(len(log_anchors) - 1):
+                if log_anchors[i] <= lf <= log_anchors[i + 1]:
+                    t = (lf - log_anchors[i]) / (log_anchors[i + 1] - log_anchors[i])
+                    g = user_gains[i] * (1.0 - t) + user_gains[i + 1] * t
+                    break
+        interpolated_gains.append(round(g, 1))
 
     left_bands = {}
     right_bands = {}
-    for i in range(10):
+    for i in range(32):
         b = {
-            'frequency': freqs[i],
-            'gain': gains[i],
-            'mode': 'RLC (BT)',
-            'mute': False,
-            'q': 1.6,
-            'slope': 'x1',
-            'solo': False,
-            'type': 'Bell',
-            'width': 4.0
+            "frequency": freqs_32[i],
+            "gain": interpolated_gains[i],
+            "mode": "RLC (BT)",
+            "mute": False,
+            "q": 4.36,
+            "slope": "x1",
+            "solo": False,
+            "type": "Bell",
+            "width": 4.0
         }
-        left_bands[f'band{i}'] = b
-        right_bands[f'band{i}'] = b
+        left_bands["band" + str(i)] = b
+        right_bands["band" + str(i)] = b
 
     eq_config = {
-        'bypass': False,
-        'input-gain': 0.0,
-        'output-gain': 0.0,
-        'left': left_bands,
-        'right': right_bands,
-        'mode': 'IIR',
-        'num-bands': 10,
-        'split-channels': False
+        "bypass": False,
+        "input-gain": 0.0,
+        "output-gain": 0.0,
+        "left": left_bands,
+        "right": right_bands,
+        "mode": "IIR",
+        "num-bands": 32,
+        "split-channels": False
     }
 
     game_blocklist = [
@@ -61,71 +89,77 @@ try:
     ]
 
     preset = {
-        'output': {
-            'blocklist': game_blocklist,
-            'plugins_order': [ 'equalizer#0' ],
-            'equalizer#0': eq_config,
-            'equalizer': eq_config
+        "output": {
+            "blocklist": game_blocklist,
+            "plugins_order": [ "equalizer#0" ],
+            "equalizer#0": eq_config,
+            "equalizer": eq_config
         }
     }
-    print(json.dumps(preset, indent=4))
+    preset_json = json.dumps(preset, indent=4)
 
-    # Also persist to easyeffectsrc database
-    import os
-    try:
-        db_dir = os.path.expanduser("~/.config/easyeffects/db")
-        os.makedirs(db_dir, exist_ok=True)
-        db_file = os.path.join(db_dir, "easyeffectsrc")
-        lines = []
-        if os.path.exists(db_file):
-            with open(db_file, "r") as f:
-                lines = f.readlines()
-        has_so = False
-        new_lines = []
-        bl_str = ",".join(game_blocklist)
-        for line in lines:
-            if line.strip().startswith("[StreamOutputs]"):
-                has_so = True
-            if line.strip().startswith("blocklist="):
-                continue
-            new_lines.append(line)
-            if has_so and line.strip().startswith("[StreamOutputs]"):
-                new_lines.append(f"blocklist={bl_str}\n")
-        if not has_so:
-            new_lines.append(f"\n[StreamOutputs]\nblocklist={bl_str}\n")
-        with open(db_file, "w") as f:
-            f.writelines(new_lines)
-    except Exception:
-        pass
+    # Save to both paths
+    p1 = os.path.expanduser("~/.config/easyeffects/output/live_eq.json")
+    p2 = os.path.expanduser("~/.local/share/easyeffects/output/live_eq.json")
+    os.makedirs(os.path.dirname(p1), exist_ok=True)
+    os.makedirs(os.path.dirname(p2), exist_ok=True)
+    with open(p1, "w") as f:
+        f.write(preset_json)
+    with open(p2, "w") as f:
+        f.write(preset_json)
+
+    # 2. Directly send command to EasyEffects Unix domain socket
+    runtime_dir = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
+    sock_path = os.path.join(runtime_dir, "EasyEffectsServer")
+    if os.path.exists(sock_path):
+        try:
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            s.settimeout(1.0)
+            s.connect(sock_path)
+            s.sendall(b"load_preset:output:live_eq\n")
+            s.close()
+        except Exception:
+            pass
+
 except Exception:
     sys.exit(1)
-" "$vals")
+' "$vals"
 
-    if [ -n "$json_output" ]; then
-        echo "$json_output" > "$PRESET_DIR1/${PRESET_NAME}.json"
-        echo "$json_output" > "$PRESET_DIR2/${PRESET_NAME}.json"
+    # 3. Also notify via socat over the Unix socket if available
+    SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/EasyEffectsServer"
+    if [ -S "$SOCK" ] && command -v socat >/dev/null 2>&1; then
+        echo "load_preset:output:live_eq" | socat - UNIX-CONNECT:"$SOCK" 2>/dev/null || true
     fi
 
-    # Ensure EasyEffects routes all outputs to the virtual sink and bypass is off
+    # 4. CLI command fallback
+    easyeffects --load-preset "live_eq" >/dev/null 2>&1 || easyeffects -l "live_eq" >/dev/null 2>&1 || true
+
+    # 5. Ensure EasyEffects routes all outputs to the virtual sink and bypass is off
     if command -v gsettings >/dev/null 2>&1; then
         gsettings set com.github.wwmm.easyeffects process-all-outputs true 2>/dev/null || true
         gsettings set com.github.wwmm.easyeffects bypass false 2>/dev/null || true
     fi
 
-    # Ensure EasyEffects daemon is running
+    # 6. Ensure EasyEffects daemon is running
     if ! pgrep -x easyeffects >/dev/null 2>&1 && ! pgrep -f "easyeffects --gapplication-service" >/dev/null 2>&1; then
         easyeffects --gapplication-service >/dev/null 2>&1 &
-        for i in {1..15}; do
-            if pgrep -x easyeffects >/dev/null 2>&1 || pgrep -f "easyeffects --gapplication-service" >/dev/null 2>&1; then
-                sleep 0.4
+        for i in {1..20}; do
+            if [ -S "$SOCK" ]; then
+                sleep 0.2
+                echo "load_preset:output:live_eq" | socat - UNIX-CONNECT:"$SOCK" 2>/dev/null || true
                 break
             fi
             sleep 0.1
         done
     fi
 
-    # Apply preset live
-    easyeffects -l "$PRESET_NAME" >/dev/null 2>&1 &
+    # 7. Ensure easyeffects_sink is set as default sink in PipeWire if present
+    if command -v wpctl >/dev/null 2>&1; then
+        EE_SINK=$(wpctl status 2>/dev/null | grep -E "easyeffects_sink" | grep -oE "[0-9]+" | head -n 1)
+        if [ -n "$EE_SINK" ]; then
+            wpctl set-default "$EE_SINK" 2>/dev/null || true
+        fi
+    fi
 }
 
 save_preset() {
@@ -139,14 +173,15 @@ arg1=$2
 arg2=$3
 
 case $cmd in
-    "get") cat "$STATE_FILE" ;;
+    "get") cat "$STATE_FILE" 2>/dev/null || echo '{"b1":0}' ;;
     "set_band")
-        tmp=$(cat "$STATE_FILE")
+        tmp=$(cat "$STATE_FILE" 2>/dev/null || echo '{"b1":0}')
         updated=$(echo "$tmp" | jq -c --arg val "$arg2" ".b$arg1 = \$val | .preset = \"Custom\" | .pending = true")
         echo "$updated" > "$STATE_FILE"
+        apply_eq
         ;;
     "apply")
-        tmp=$(cat "$STATE_FILE")
+        tmp=$(cat "$STATE_FILE" 2>/dev/null || echo '{"b1":0}')
         updated=$(echo "$tmp" | jq -c ".pending = false")
         echo "$updated" > "$STATE_FILE"
         apply_eq
@@ -154,7 +189,7 @@ case $cmd in
     "preset")
         case $arg1 in
             "Flat")    save_preset 0 0 0 0 0 0 0 0 0 0 "Flat" ;;
-            "Bass")    save_preset 5 7 5 2 1 0 0 0 1 2 "Bass" ;;
+            "Bass")    save_preset 6 7 5 3 1 0 0 0 1 2 "Bass" ;;
             "Treble")  save_preset -2 -1 0 1 2 3 4 5 6 6 "Treble" ;;
             "Vocal")   save_preset -2 -1 1 3 5 5 4 2 1 0 "Vocal" ;;
             "Pop")     save_preset 2 4 2 0 1 2 4 2 1 2 "Pop" ;;

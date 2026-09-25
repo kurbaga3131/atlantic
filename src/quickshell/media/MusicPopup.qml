@@ -391,16 +391,12 @@ Item {
         return ThemeBackend.text || "#cdd6f4";
     }
 
+    readonly property string eqScriptPath: (typeof Caching !== "undefined" && Caching.qsDir) ? (Caching.qsDir + "/media/equalizer.sh") : "$HOME/.local/share/atlantic/src/quickshell/media/equalizer.sh"
+
     function execCmd(cmdStr) {
-        var safeCmd = cmdStr.replace(/`/g, "\\`");
-        var p = Qt.createQmlObject(`
-            import Quickshell.Io
-            Process {
-                command: ["bash", "-c", \`${safeCmd}\`]
-                running: true
-                onExited: (exitCode) => destroy()
-            }
-        `, root);
+        if (typeof Quickshell !== "undefined" && Quickshell.execDetached) {
+            Quickshell.execDetached(["bash", "-c", cmdStr]);
+        }
     }
 
     function applyPresetOptimistically(presetName) {
@@ -426,7 +422,7 @@ Item {
             root.lastEqUpdate = Date.now();
             
             root.triggerEqLightning();
-            execCmd(Caching.qsDir + `/media/equalizer.sh preset ${presetName}`);
+            execCmd(`bash "${root.eqScriptPath}" preset ${presetName}`);
         }
     }
 
@@ -443,7 +439,7 @@ Item {
     Process {
         id: eqProc
         running: true
-        command: ["bash", "-c", Caching.qsDir + "/media/equalizer.sh get"]
+        command: ["bash", "-c", `bash "${root.eqScriptPath}" get`]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (this.text) {
@@ -1320,7 +1316,7 @@ Item {
                                     root.lastEqUpdate = Date.now();
                                     
                                     root.triggerEqLightning();
-                                    root.execCmd(Caching.qsDir + "/media/equalizer.sh apply");
+                                    root.execCmd(`bash "${root.eqScriptPath}" apply`);
                                 }
                             }
                         }
@@ -1427,7 +1423,7 @@ Item {
                                                     
                                                     root.lastEqUpdate = Date.now();
                                                     
-                                                    root.execCmd(Caching.qsDir + `/media/equalizer.sh set_band ${modelData.idx} ${Math.round(value)}`);
+                                                    root.execCmd(`bash "${root.eqScriptPath}" set_band ${modelData.idx} ${Math.round(value)}`);
                                                 }
                                             }
 
