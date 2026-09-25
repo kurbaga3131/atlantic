@@ -55,8 +55,9 @@ REQUIRED_PKGS=(
     "ffmpeg" "fastfetch" "quickshell" "unzip" "python-websockets" "qt6-websockets"
     "grim" "playerctl" "satty" "xdg-desktop-portal-gtk" "slurp" "wmctrl" "power-profiles-daemon" "easyeffects" "nautilus" "qt5-wayland" "qt5-quickcontrols" "qt5-quickcontrols2" "qt5-graphicaleffects" "qt6-wayland"
     "qt5ct" "qt6ct" "gpu-screen-recorder" "wf-recorder" "adw-gtk-theme" "wl-gammarelay-rs" "google-chrome"
-    "loupe" "mpv" "mousepad" "evince" "file-roller" "libratbag"
-    "steam" "zenity" "lib32-systemd" "xorg-server-xvfb" "lib32-mesa" "vulkan-radeon" "lib32-vulkan-radeon" "lib32-vulkan-icd-loader" "ttf-liberation"
+    "steam" "zenity" "lib32-systemd" "xorg-server-xvfb" "ttf-liberation" "ttf-dejavu" "lib32-fontconfig"
+    "vulkan-icd-loader" "lib32-vulkan-icd-loader" "vulkan-tools" "mesa" "lib32-mesa"
+    "gamemode" "lib32-gamemode" "gamescope" "lib32-pipewire" "lib32-libpulse"
     "discord" "cloudflare-warp-bin" "spotify" "spicetify-cli" "spicetify-marketplace-bin"
 )
 
@@ -200,13 +201,11 @@ install_dependencies() {
     local GPU_RAW
     GPU_RAW=$(lspci -nn 2>/dev/null | grep -iE 'vga|3d|display' | tr '[:upper:]' '[:lower:]')
     if [[ "$GPU_RAW" == *"amd"* || "$GPU_RAW" == *"radeon"* ]]; then
-        target_list+=("mesa" "vulkan-radeon" "libva-mesa-driver" "xf86-video-amdgpu")
+        target_list+=("vulkan-radeon" "lib32-vulkan-radeon" "libva-mesa-driver" "lib32-libva-mesa-driver" "xf86-video-amdgpu")
     elif [[ "$GPU_RAW" == *"intel"* ]]; then
-        target_list+=("mesa" "vulkan-intel" "intel-media-driver")
+        target_list+=("vulkan-intel" "lib32-vulkan-intel" "intel-media-driver")
     elif [[ "$GPU_RAW" == *"nvidia"* ]]; then
-        target_list+=("nvidia" "nvidia-utils" "egl-wayland")
-    else
-        target_list+=("mesa")
+        target_list+=("nvidia-dkms" "nvidia-utils" "lib32-nvidia-utils" "egl-wayland" "opencl-nvidia" "lib32-opencl-nvidia")
     fi
 
     if [[ ("$install_state" == "fresh" || "$install_state" == "legacy") && "$is_reinstall" != "true" ]]; then

@@ -20,45 +20,27 @@ if ! pgrep -x steam >/dev/null 2>&1 && ! pgrep -f "ubuntu12_32/steam" >/dev/null
     rm -f "$HOME/.local/share/Steam/.steam_is_running.lock" "$HOME/.steam/steam.pid" "$HOME/.steam/steam.pipe" 2>/dev/null || true
 fi
 
-# 4. Check if Steam has already completed initial bootstrap
-IS_FIRST_RUN=false
-if [ ! -d "$HOME/.local/share/Steam/ubuntu12_32/steam-runtime" ]; then
-    IS_FIRST_RUN=true
+# 4. If Steam is already installed and bootstrapped, launch directly
+if [ -f "$HOME/.local/share/Steam/ubuntu12_32/steam" ] || [ -d "$HOME/.local/share/Steam/ubuntu12_32/steam-runtime" ]; then
+    gtk-launch steam 2>/dev/null || steam &
+    exit 0
 fi
 
-# 5. Launch Steam
-(gtk-launch steam 2>/dev/null || steam) &
-
-# 6. If first run, show Zenity progress dialog matching Discord's dialog
-if [ "$IS_FIRST_RUN" = true ] && command -v zenity >/dev/null 2>&1; then
-    (
-        zenity --progress \
-            --title="Progress" \
-            --text="Downloading Steam..." \
-            --pulsate \
-            --auto-close \
-            --no-cancel 2>/dev/null &
-        ZEN_PID=$!
-
-        for i in {1..300}; do
-            sleep 1
-            # Close dialog if Steam window appeared
-            if command -v hyprctl >/dev/null 2>&1 && hyprctl clients 2>/dev/null | grep -i "class:.*steam" >/dev/null 2>&1; then
-                kill "$ZEN_PID" 2>/dev/null || true
-                break
-            fi
-            # Close dialog if steam-runtime is installed
-            if [ -d "$HOME/.local/share/Steam/ubuntu12_32/steam-runtime" ]; then
-                sleep 2
-                kill "$ZEN_PID" 2>/dev/null || true
-                break
-            fi
-            # Close dialog if steam died
-            if ! pgrep -x steam >/dev/null 2>&1 && ! pgrep -f "ubuntu12_32/steam" >/dev/null 2>&1; then
-                kill "$ZEN_PID" 2>/dev/null || true
-                break
-            fi
-        done
-        kill "$ZEN_PID" 2>/dev/null || true
-    ) &
+# 5. First-time setup: launch in floating terminal so user sees live download progress
+if command -v kitty >/dev/null 2>&1; then
+    kitty --class steam-installer --title "Steam Setup" -e bash -c '
+        echo -e "\033[1;36m===================================================\033[0m"
+        echo -e "\033[1;32m       Steam İlk Kurulumu ve İndirmesi            \033[0m"
+        echo -e "\033[1;36m===================================================\033[0m"
+        echo -e "\033[0;33mDosyalar indirilirken lütfen bu pencereyi kapatmayın.\033[0m\n"
+        steam
+        STATUS=$?
+        if [ $STATUS -ne 0 ]; then
+            echo -e "\n\033[1;31m[HATA] Steam başlatılırken bir sorun oluştu (Kod: $STATUS).\033[0m"
+            echo "Kapatmak için Enter tuşuna basın..."
+            read -r
+        fi
+    ' &
+else
+    gtk-launch steam 2>/dev/null || steam &
 fi
