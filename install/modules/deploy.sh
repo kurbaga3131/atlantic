@@ -4,6 +4,8 @@ EXTRA_CONFIGS=(
     "kitty"
     "cava"
     "fastfetch"
+    "gtk-3.0"
+    "gtk-4.0"
 )
 
 render_wallpaper_progress() {
@@ -488,5 +490,11 @@ deploy_package() {
         ln -sf "$TARGET_BASE/bin/atlanticd" "$BIN_DIR/atlanticd"
         sudo ln -sf "$TARGET_BASE/bin/atlanticd" /usr/local/bin/atlanticd 2>/dev/null || true
     fi
+
+    if command -v gsettings &>/dev/null; then
+        gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+        gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark' 2>/dev/null || true
+    fi
 }
+
 

@@ -10,8 +10,6 @@ for_window [class="(?i)zenity"] floating enable
 for_window [app_id="steam-installer"] floating enable
 for_window [class="steam-installer"] floating enable
 
-for_window [app_id="(?i)(org\.gnome\.nautilus|nautilus)"] opacity 0.85
-for_window [app_id="(?i)pavucontrol"] opacity 0.86
-for_window [app_id="(?i)easyeffects"] opacity 0.88
+for_window [app_id="(?i)(org\.gnome\.nautilus|nautilus)"] opacity 0.72
 
 

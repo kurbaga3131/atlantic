@@ -1,0 +1,14 @@
+/* Atlantic Deep Dark Background for GTK3 */
+window, .background {
+    background-color: #0b0d12;
+    color: #e2e4ea;
+}
+
+.view, .sidebar, GtkTreeView {
+    background-color: #0b0d12;
+    color: #e2e4ea;
+}
+
+headerbar {
+    background-color: #08090d;
+}
