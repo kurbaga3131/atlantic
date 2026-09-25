@@ -29,7 +29,52 @@ Rectangle {
     readonly property real itemSpacing: barWindow ? barWindow.s(isCompact ? 8 : 10) : (isCompact ? 8 : 10)
     readonly property real iconPadding: barWindow ? barWindow.s(isCompact ? 10 : 12) : (isCompact ? 10 : 12)
     readonly property real totalPadding: iconPadding * 2
-    readonly property int itemCount: (moduleActive && trayRepeater.count > 0) ? trayRepeater.count : 0
+
+    property int forceCountUpdate: 0
+
+    function isItemIgnored(item) {
+        if (!item) return false;
+        let mId = String(item.id || "").toLowerCase();
+        let mTitle = String(item.title || "").toLowerCase();
+        let mIcon = String(item.icon || item.iconName || "").toLowerCase();
+        let mTooltip = String(item.tooltip || "").toLowerCase();
+        if (mId.includes("easyeffects") || mTitle.includes("easyeffects") ||
+            mIcon.includes("easyeffects") || mTooltip.includes("easyeffects")) {
+            return true;
+        }
+        return false;
+    }
+
+    readonly property int itemCount: {
+        if (!moduleActive) return 0;
+        let dummy = trayRepeater.count;
+        let dummy2 = forceCountUpdate;
+        let list = SystemTray.items;
+        if (!list) return 0;
+        let c = 0;
+        let arr = list.values || list;
+        if (arr && arr.length !== undefined) {
+            for (let i = 0; i < arr.length; i++) {
+                if (arr[i] && !sideTrayWidgetRoot.isItemIgnored(arr[i])) c++;
+            }
+            return c;
+        }
+        if (list.count !== undefined && typeof list.get === "function") {
+            for (let j = 0; j < list.count; j++) {
+                let it = list.get(j);
+                if (it && !sideTrayWidgetRoot.isItemIgnored(it)) c++;
+            }
+            return c;
+        }
+        if (trayRepeater && trayRepeater.count > 0) {
+            for (let k = 0; k < trayRepeater.count; k++) {
+                let itm = trayRepeater.itemAt(k);
+                if (itm && itm.visible) c++;
+            }
+            return c;
+        }
+        return 0;
+    }
 
     property real baseWidth: barWindow ? (isGrouped ? barWindow.barHeight - 8 : ((isSolid && distinctPills) ? barWindow.barHeight - 6 : barWindow.barHeight)) : (isGrouped ? 22 : ((isSolid && distinctPills) ? 24 : 30))
     property real targetWidth: baseWidth
@@ -141,27 +186,32 @@ Rectangle {
             model: sideTrayWidgetRoot.moduleActive ? SystemTray.items : null
 
             onCountChanged: {
-                if (count === 0) {
+                sideTrayWidgetRoot.forceCountUpdate++;
+                if (count === 0 || sideTrayWidgetRoot.itemCount === 0) {
                     TrayMenuController.hide();
                 }
             }
 
             delegate: Image {
                 id: trayIcon
-                source: modelData.icon || ""
+                readonly property bool isBlacklisted: sideTrayWidgetRoot.isItemIgnored(modelData)
+                visible: !isBlacklisted
+                width: isBlacklisted ? 0 : sideTrayWidgetRoot.iconSize
+                height: isBlacklisted ? 0 : sideTrayWidgetRoot.iconSize
+                source: isBlacklisted ? "" : (modelData.icon || "")
                 fillMode: Image.PreserveAspectFit
 
                 sourceSize: Qt.size(sideTrayWidgetRoot.iconSize, sideTrayWidgetRoot.iconSize)
-                width: sideTrayWidgetRoot.iconSize
-                height: sideTrayWidgetRoot.iconSize
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                property bool isHovered: trayMouse.containsMouse
+                property bool isHovered: !isBlacklisted && trayMouse.containsMouse
                 property bool initAnimTrigger: false
-                opacity: initAnimTrigger ? (isHovered ? 1.0 : (sideTrayWidgetRoot.isCompact ? 0.9 : 0.8)) : 0.0
-                scale: initAnimTrigger ? (isHovered ? 1.15 : 1.0) : 0.0
+                opacity: isBlacklisted ? 0.0 : (initAnimTrigger ? (isHovered ? 1.0 : (sideTrayWidgetRoot.isCompact ? 0.9 : 0.8)) : 0.0)
+                scale: isBlacklisted ? 0.0 : (initAnimTrigger ? (isHovered ? 1.15 : 1.0) : 0.0)
 
                 Component.onCompleted: {
+                    sideTrayWidgetRoot.forceCountUpdate++;
+                    if (isBlacklisted) return;
                     if (barWindow && !barWindow.startupCascadeFinished) {
                         trayAnimTimer.interval = index * 45 + 180
                         if (sideTrayWidgetRoot.moduleActive) trayAnimTimer.start()
@@ -171,6 +221,8 @@ Rectangle {
                 }
 
                 Component.onDestruction: {
+                    sideTrayWidgetRoot.forceCountUpdate++;
+                    if (isBlacklisted) return;
                     if (trayMouse.containsMouse) {
                         TrayMenuController.itemExited();
                     }
@@ -203,6 +255,7 @@ Rectangle {
                 Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
                 function openMenu(action) {
+                    if (isBlacklisted) return;
                     TrayMenuController.cancelHide();
                     let pt = trayIcon.mapToItem(null, 0, 0);
                     let scr = (barWindow && barWindow.screen) ? barWindow.screen : null;
@@ -221,19 +274,23 @@ Rectangle {
                     id: trayMouse
                     anchors.fill: parent
                     anchors.margins: -(barWindow ? barWindow.s(4) : 4)
-                    hoverEnabled: true
+                    hoverEnabled: !trayIcon.isBlacklisted
+                    enabled: !trayIcon.isBlacklisted
                     cursorShape: Qt.PointingHandCursor
                     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
                     onEntered: {
+                        if (trayIcon.isBlacklisted) return;
                         trayIcon.openMenu("show");
                     }
 
                     onExited: {
+                        if (trayIcon.isBlacklisted) return;
                         TrayMenuController.itemExited();
                     }
 
                     onClicked: mouse => {
+                        if (trayIcon.isBlacklisted) return;
                         if (mouse.button === Qt.LeftButton) {
                             if (modelData.isMenuOnly || modelData.onlyMenu) {
                                 trayIcon.openMenu("toggle");

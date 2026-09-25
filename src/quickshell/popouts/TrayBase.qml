@@ -149,6 +149,15 @@ PanelWindow {
         trayMenuWindow.closeMenu();
     }
 
+    function isIgnored(it) {
+        if (!it) return false;
+        let mId = String(it.id || "").toLowerCase();
+        let mTitle = String(it.title || "").toLowerCase();
+        let mIcon = String(it.icon || it.iconName || "").toLowerCase();
+        let mTooltip = String(it.tooltip || "").toLowerCase();
+        return mId.includes("easyeffects") || mTitle.includes("easyeffects") || mIcon.includes("easyeffects") || mTooltip.includes("easyeffects");
+    }
+
     property var activeItem: {
         if (!activeItemId && activeItemId !== 0) return null;
         let list = SystemTray.items;
@@ -158,6 +167,7 @@ PanelWindow {
             for (let i = 0; i < arr.length; i++) {
                 let it = arr[i];
                 if (it && (String(it.id) === String(activeItemId) || String(i) === String(activeItemId))) {
+                    if (isIgnored(it)) return null;
                     return it;
                 }
             }
@@ -166,14 +176,16 @@ PanelWindow {
             for (let j = 0; j < list.count; j++) {
                 let it = list.get(j);
                 if (it && (String(it.id) === String(activeItemId) || String(j) === String(activeItemId))) {
+                    if (isIgnored(it)) return null;
                     return it;
                 }
             }
         }
         let num = parseInt(activeItemId);
         if (!isNaN(num)) {
-            if (list.values && list.values[num]) return list.values[num];
-            if (list[num]) return list[num];
+            let candidate = (list.values && list.values[num]) ? list.values[num] : (list[num] ? list[num] : null);
+            if (candidate && isIgnored(candidate)) return null;
+            if (candidate) return candidate;
         }
         return null;
     }

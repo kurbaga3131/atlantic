@@ -154,6 +154,9 @@ except Exception:
     fi
 
     # 7. Ensure easyeffects_sink is set as default sink in PipeWire if present
+    if command -v pactl >/dev/null 2>&1; then
+        pactl set-default-sink easyeffects_sink 2>/dev/null || true
+    fi
     if command -v wpctl >/dev/null 2>&1; then
         EE_SINK=$(wpctl status 2>/dev/null | grep -E "easyeffects_sink" | grep -oE "[0-9]+" | head -n 1)
         if [ -n "$EE_SINK" ]; then

@@ -126,6 +126,10 @@ EOF
         gsettings set com.github.wwmm.easyeffects bypass false 2>/dev/null || true
     fi
 
+    if command -v pactl >/dev/null 2>&1; then
+        pactl set-default-sink easyeffects_sink 2>/dev/null || true
+    fi
+
     enable_user_service "easyeffects" "$init_sys"
     enable_system_service "NetworkManager" "$init_sys"
     enable_system_service "bluetooth" "$init_sys"
