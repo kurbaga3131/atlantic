@@ -125,6 +125,15 @@ build_manifest() {
 }
 
 handle_wallpaper_prep() {
+    # Ensure bundled wallpapers exist in user's Wallpapers directory
+    for wp_src in "$ATLANTIC_DIR/../wallpapers" "$HOME/.local/share/atlantic/wallpapers" "/usr/share/atlantic/wallpapers"; do
+        if [ -d "$wp_src" ]; then
+            mkdir -p "$SRC_DIR" 2>/dev/null || true
+            cp -n "$wp_src"/* "$SRC_DIR/" 2>/dev/null || true
+            break
+        fi
+    done
+
     [[ -d "$THUMB_DIR" ]] || mkdir -p "$THUMB_DIR"
 
     (

@@ -70,14 +70,20 @@ install_wallpapers() {
 
     # Try local copy first
     local wp_count=0
-    if [ -d "$PROJECT_ROOT/wallpapers" ]; then
-        wp_count=$(find "$PROJECT_ROOT/wallpapers" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" -o -iname "*.mp4" -o -iname "*.mkv" \) 2>/dev/null | wc -l)
-    fi
+    for cand in "$PROJECT_ROOT/wallpapers" "$REPO_ROOT/wallpapers" "$TARGET_BASE/wallpapers" "$HOME/.local/share/atlantic/wallpapers"; do
+        if [ -n "$cand" ] && [ -d "$cand" ]; then
+            local cnt
+            cnt=$(find "$cand" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" -o -iname "*.mp4" -o -iname "*.mkv" \) 2>/dev/null | wc -l)
+            if [ "$cnt" -gt 0 ]; then
+                wp_count=$cnt
+                echo -e "  \e[36m[ INFO ]\e[0m Copying $wp_count wallpapers from $cand..."
+                find "$cand" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" -o -iname "*.mp4" -o -iname "*.mkv" \) -exec cp {} "$wallpaper_dir/" \; 2>>"$debug_log" || true
+                break
+            fi
+        fi
+    done
 
-    if [ "$wp_count" -gt 0 ]; then
-        echo -e "  \e[36m[ INFO ]\e[0m Copying $wp_count wallpapers from local repo..."
-        find "$PROJECT_ROOT/wallpapers" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" -o -iname "*.mp4" -o -iname "*.mkv" \) -exec cp {} "$wallpaper_dir/" \; 2>>"$debug_log" || true
-    else
+    if [ "$wp_count" -eq 0 ]; then
         echo -e "  \e[33m[ WARN ]\e[0m Local wallpapers not found, downloading from GitHub..."
         if command -v curl &>/dev/null; then
             local api_url="https://api.github.com/repos/${repo_slug}/contents/wallpapers?ref=main"
@@ -311,6 +317,15 @@ deploy_package() {
             cp "$REPO_ROOT/version.txt" "$TARGET_BASE/src/" 2>/dev/null || true
         fi
 
+        if [ -d "$REPO_ROOT/wallpapers" ] && [ "$(ls -A "$REPO_ROOT/wallpapers" 2>/dev/null)" ]; then
+            mkdir -p "$TARGET_BASE/wallpapers"
+            cp -r "$REPO_ROOT/wallpapers/." "$TARGET_BASE/wallpapers/"
+            local wp_dir
+            wp_dir=$(get_wallpaper_dir)
+            mkdir -p "$wp_dir"
+            cp -r "$REPO_ROOT/wallpapers/." "$wp_dir/"
+        fi
+
         for cfg in "${EXTRA_CONFIGS[@]}"; do
             local src_cfg="$REPO_ROOT/config/$cfg"
             local dest_cfg="$HOME/.config/$cfg"
@@ -477,6 +492,12 @@ deploy_package() {
                             cp "$REPO_ROOT/$file" "$HOME/.config/$target_config_name/$comp_file"
                         fi
                     done
+                elif [[ "$file" == wallpapers/* ]]; then
+                    local wp_dir
+                    wp_dir=$(get_wallpaper_dir)
+                    mkdir -p "$wp_dir" "$TARGET_BASE/wallpapers" 2>/dev/null || true
+                    cp "$REPO_ROOT/$file" "$wp_dir/" 2>/dev/null || true
+                    cp "$REPO_ROOT/$file" "$TARGET_BASE/wallpapers/" 2>/dev/null || true
                 fi
             done <<< "$changed_files"
         fi
