@@ -495,6 +495,13 @@ deploy_package() {
         gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
         gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark' 2>/dev/null || true
     fi
+
+    # Gaming optimization: Increase vm.max_map_count for CS2 / Source 2 / heavy games
+    if command -v sysctl &>/dev/null; then
+        echo "vm.max_map_count=2147483642" | sudo tee /etc/sysctl.d/99-atlantic-gaming.conf >/dev/null 2>&1 || true
+        sudo sysctl -q -p /etc/sysctl.d/99-atlantic-gaming.conf >/dev/null 2>&1 || true
+    fi
 }
+
 
 
