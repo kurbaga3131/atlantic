@@ -98,6 +98,13 @@ install_wallpapers() {
         fi
     fi
 
+    # Set Zerene Cyberpunk Blue as initial wallpaper cache if none exists
+    local wp_cache="$HOME/.cache/atlantic/wallpaper"
+    mkdir -p "$wp_cache" 2>/dev/null || true
+    if [ ! -f "$wp_cache/current_wallpaper.png" ] && [ -f "$wallpaper_dir/zerene-cyberpunk-blue.png" ]; then
+        cp "$wallpaper_dir/zerene-cyberpunk-blue.png" "$wp_cache/current_wallpaper.png" 2>/dev/null || true
+    fi
+
     # Avatars - local copy first, then GitHub fallback
     local av_count=0
     if [ -d "$PROJECT_ROOT/avatars" ]; then

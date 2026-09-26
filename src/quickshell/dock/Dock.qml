@@ -915,6 +915,13 @@ fi &
                         Quickshell.execDetached(["bash", "-c", spotifyHook]);
                     }
 
+                    let isKitty = cleanId.toLowerCase() === "kitty" || nameLower === "kitty";
+                    if (isKitty && typeof Quickshell !== "undefined") {
+                        let dashboardLauncher = (typeof Caching !== "undefined" && Caching.atlanticDir) ? (Caching.atlanticDir + "/scripts/dashboard.sh") : "$HOME/.local/share/atlantic/src/scripts/dashboard.sh";
+                        Quickshell.execDetached(["bash", "-c", "if [ -f \"" + dashboardLauncher + "\" ]; then bash \"" + dashboardLauncher + "\"; else kitty & fi"]);
+                        return;
+                    }
+
                     if (typeof DesktopEntries !== "undefined") {
                         let entry = null;
                         if (desktopId) entry = DesktopEntries.byId(desktopId);

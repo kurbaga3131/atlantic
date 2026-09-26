@@ -1,10 +1,10 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
   "logo": {
-    "source": "small",
+    "source": "~/.config/fastfetch/zerene.txt",
     "color": {
-      "1": "#89b4fa",
-      "2": "#74c7ec"
+      "1": "#00aaff",
+      "2": "#0055ff"
     },
     "padding": {
       "top": 1,
@@ -15,7 +15,7 @@
   "display": {
     "separator": "  ",
     "color": {
-      "separator": "#cdd6f4"
+      "separator": "#00aaff"
     }
   },
   "modules": [
@@ -24,29 +24,29 @@
       "type": "title",
       "format": "{1}",
       "color": {
-        "user": "#89b4fa"
+        "user": "#00d4ff"
       }
     },
     "break",
     {
       "type": "os",
       "key": "󱄅 os ",
-      "keyColor": "#89b4fa"
+      "keyColor": "#00aaff"
     },
     {
       "type": "cpu",
       "key": " cpu",
-      "keyColor": "#74c7ec"
+      "keyColor": "#0088ff"
     },
     {
       "type": "memory",
       "key": "󰘚 ram",
-      "keyColor": "#94e2d5"
+      "keyColor": "#00d4ff"
     },
     {
       "type": "shell",
       "key": " sh ",
-      "keyColor": "#cba6f7"
+      "keyColor": "#55aaff"
     },
     "break",
     {

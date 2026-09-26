@@ -20,3 +20,12 @@ noise_reduction = 77
 4 = 1.2
 5 = 1.5
 
+[color]
+background = 'default'
+foreground = '#00aaff'
+
+gradient = 1
+gradient_count = 3
+gradient_color_1 = '#0055ff'
+gradient_color_2 = '#00aaff'
+gradient_color_3 = '#55c8ff'

@@ -46,7 +46,7 @@ SUPPORTED_DISTROS=(
 )
 
 REQUIRED_PKGS=(
-    "kitty" "cava" "zbar" "pavucontrol" "alsa-utils"
+    "kitty" "cava" "btop" "zbar" "pavucontrol" "alsa-utils"
     "wl-clipboard" "fd" "qt6-multimedia" "qt6-5compat" "ripgrep"
     "cliphist" "jq" "socat" "inotify-tools" "pamixer" "brightnessctl" "ddcutil" "acpi" "iw"
     "bluez" "bluez-utils" "libnotify" "networkmanager" "lm_sensors" "bc" "matugen"

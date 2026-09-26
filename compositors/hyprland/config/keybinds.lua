@@ -52,7 +52,8 @@ hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("atlantic volume raise"), { repe
 
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("firefox"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("atlantic dashboard"))
+hl.bind(mainMod .. " + SHIFT + RETURN", hl.dsp.exec_cmd(terminal))
 
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("atlantic reload"))
 
