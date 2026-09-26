@@ -501,7 +501,35 @@ deploy_package() {
         echo "vm.max_map_count=2147483642" | sudo tee /etc/sysctl.d/99-atlantic-gaming.conf >/dev/null 2>&1 || true
         sudo sysctl -q -p /etc/sysctl.d/99-atlantic-gaming.conf >/dev/null 2>&1 || true
     fi
+
+    # Memory optimization: Ensure Swap / ZRAM exists so 8GB RAM systems don't trigger OOM Killer in heavy games (CS2)
+    if ! swapon --show 2>/dev/null | grep -q "/"; then
+        if [ ! -f /swapfile ]; then
+            sudo fallocate -l 8G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=8192 2>/dev/null || true
+            sudo chmod 600 /swapfile 2>/dev/null || true
+            sudo mkswap /swapfile 2>/dev/null || true
+            sudo swapon /swapfile 2>/dev/null || true
+            if ! grep -q "/swapfile" /etc/fstab 2>/dev/null; then
+                echo "/swapfile none swap defaults 0 0" | sudo tee -a /etc/fstab >/dev/null 2>&1 || true
+            fi
+        else
+            sudo swapon /swapfile 2>/dev/null || true
+        fi
+    fi
+
+    if [ ! -f /etc/systemd/zram-generator.conf ] && command -v pacman &>/dev/null; then
+        sudo pacman -S --needed --noconfirm zram-generator >/dev/null 2>&1 || true
+        cat << 'EOF' | sudo tee /etc/systemd/zram-generator.conf >/dev/null 2>&1 || true
+[zram0]
+zram-size = ram
+compression-algorithm = zstd
+swap-priority = 100
+EOF
+        sudo systemctl daemon-reload 2>/dev/null || true
+        sudo systemctl start /dev/zram0 2>/dev/null || true
+    fi
 }
+
 
 
 

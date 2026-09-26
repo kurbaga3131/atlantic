@@ -57,7 +57,7 @@ REQUIRED_PKGS=(
     "qt5ct" "qt6ct" "gpu-screen-recorder" "wf-recorder" "adw-gtk-theme" "wl-gammarelay-rs" "google-chrome"
     "steam" "zenity" "lib32-systemd" "xorg-server-xvfb" "ttf-liberation" "ttf-dejavu" "lib32-fontconfig"
     "vulkan-icd-loader" "lib32-vulkan-icd-loader" "vulkan-tools" "mesa" "lib32-mesa"
-    "gamemode" "lib32-gamemode" "gamescope" "lib32-pipewire" "lib32-libpulse"
+    "gamemode" "lib32-gamemode" "gamescope" "lib32-pipewire" "lib32-libpulse" "zram-generator"
     "discord" "cloudflare-warp-bin" "spotify" "spicetify-cli" "spicetify-marketplace-bin"
 )
 
