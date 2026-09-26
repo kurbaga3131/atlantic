@@ -496,18 +496,25 @@ deploy_package() {
         gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark' 2>/dev/null || true
     fi
 
-    # Gaming optimization: Increase vm.max_map_count for CS2 / Source 2 / heavy games
+    # Gaming & memory optimization: vm.max_map_count for CS2/Source 2 and swappiness for proactive RAM freeing
     if command -v sysctl &>/dev/null; then
-        echo "vm.max_map_count=2147483642" | sudo tee /etc/sysctl.d/99-atlantic-gaming.conf >/dev/null 2>&1 || true
+        cat << 'EOF' | sudo tee /etc/sysctl.d/99-atlantic-gaming.conf >/dev/null 2>&1 || true
+vm.max_map_count=2147483642
+vm.swappiness=80
+EOF
         sudo sysctl -q -p /etc/sysctl.d/99-atlantic-gaming.conf >/dev/null 2>&1 || true
     fi
 
-    # Memory optimization: Ensure Swap / ZRAM exists so 8GB RAM systems don't trigger OOM Killer in heavy games (CS2)
+    # Memory optimization: Ensure 12GB Swap / ZRAM exists so 8GB RAM systems don't trigger OOM Killer in heavy games (CS2)
     if ! swapon --show 2>/dev/null | grep -q "/"; then
         if [ ! -f /swapfile ]; then
-            sudo fallocate -l 8G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=8192 2>/dev/null || true
-            sudo chmod 600 /swapfile 2>/dev/null || true
-            sudo mkswap /swapfile 2>/dev/null || true
+            if findmnt -no FSTYPE / 2>/dev/null | grep -q btrfs; then
+                sudo btrfs filesystem mkswapfile --size 12g /swapfile 2>/dev/null || true
+            else
+                sudo fallocate -l 12G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=12288 2>/dev/null || true
+                sudo chmod 600 /swapfile 2>/dev/null || true
+                sudo mkswap /swapfile 2>/dev/null || true
+            fi
             sudo swapon /swapfile 2>/dev/null || true
             if ! grep -q "/swapfile" /etc/fstab 2>/dev/null; then
                 echo "/swapfile none swap defaults 0 0" | sudo tee -a /etc/fstab >/dev/null 2>&1 || true
@@ -529,6 +536,7 @@ EOF
         sudo systemctl start /dev/zram0 2>/dev/null || true
     fi
 }
+
 
 
 
