@@ -349,7 +349,6 @@ ALLOWED_SCRIPTS=(
     "location_manual"
     "blue_light_filter"
     "setup_hardware"
-    "dashboard"
 )
 
 COMMAND="$1"

@@ -25,6 +25,10 @@ hl.bind("ALT + F4", hl.dsp.window.close())
 
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
 
+-- Fullscreen toggle: F11 or SUPER+F11
+hl.bind("F11", hl.dsp.exec_cmd("hyprctl dispatch fullscreen 0"))
+hl.bind(mainMod .. " + F11", hl.dsp.exec_cmd("hyprctl dispatch fullscreen 0"))
+
 -- Alt+Tab window switching (Windows-style)
 hl.bind("ALT + TAB", hl.dsp.exec_cmd("hyprctl dispatch cyclenext"))
 hl.bind("ALT + SHIFT + TAB", hl.dsp.exec_cmd("hyprctl dispatch cyclenext prev"))
@@ -52,8 +56,7 @@ hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("atlantic volume raise"), { repe
 
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("firefox"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("atlantic dashboard"))
-hl.bind(mainMod .. " + SHIFT + RETURN", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("atlantic reload"))
 

@@ -1,8 +1,6 @@
 hl.config({
   general = {
-    border_size = 2,
-    ["col.active_border"] = "rgba(00aaffff)",
-    ["col.inactive_border"] = "rgba(001133aa)",
+    border_size = 0,
     gaps_in = 4,
     gaps_out = 6,
     float_gaps = 6,
@@ -95,6 +93,15 @@ hl.window_rule({
   },
   opacity = "0.72 0.65",
 })
+
+-- CS2 automatic fullscreen rule
+hl.window_rule({
+  match = {
+    class = "(?i)cs2",
+  },
+  fullscreen = true,
+})
+
 
 
 
